@@ -116,8 +116,8 @@ We are now ready to set-up Kubernetes master node.
 
 First, we need to run `etcd`, the store used by Kubernetes. The following is a one-time step only:
 ```sh
-cd ~/kubernetes-ovn-heterogeneous-cluster
-cp master/systemd/*.service /etc/systemd/system/
+cd ~/kubernetes-ovn-heterogeneous-cluster/master
+cp -R systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable etcd3
 systemctl start etcd3
@@ -125,12 +125,10 @@ systemctl start etcd3
 
 Then, proceed to set-up Kubernetes:
 ```sh
-cd ~/kubernetes-ovn-heterogeneous-cluster
-
 ./make-certs
 
 mkdir -p /etc/kubernetes
-cp -R master/manifests /etc/kubernetes/
+cp -R manifests /etc/kubernetes/
 
 systemctl enable kubelet
 systemctl start kubelet
@@ -143,8 +141,8 @@ kubectl config set-credentials default-admin --certificate-authority=/etc/kubern
 kubectl config set-context local --cluster=default-cluster --user=default-admin
 kubectl config use-context local
 
-kubectl create -f kubedns-deployment.yaml
-kubectl create -f kubedns-service.yaml
+kubectl create -f ../kubedns-deployment.yaml
+kubectl create -f ../kubedns-service.yaml
 ```
 
 Last step is to configure pod networking for this node:
@@ -152,6 +150,7 @@ Last step is to configure pod networking for this node:
 ovs-vsctl set Open_vSwitch . external_ids:k8s-api-server="127.0.0.1:8080"
 
 apt-get install -y python-pip
+cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
 pip install --prefix=/usr/local .
