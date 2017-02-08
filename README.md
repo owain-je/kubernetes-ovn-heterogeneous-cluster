@@ -176,7 +176,136 @@ Let's proceed to set-up the worker nodes.
 
 ### Node set-up
 
-**TODO**
+Let's provision the master VM:
+```sh
+gcloud compute instances create "sig-windows-worker-linux" \
+    --zone "us-east1-d" \
+    --machine-type "custom-2-2048" \
+    --subnet "default" \
+    --can-ip-forward \
+    --maintenance-policy "MIGRATE" \
+    --image "ubuntu-1604-xenial-v20170125" \
+    --image-project "ubuntu-os-cloud" \
+    --boot-disk-size "50" \
+    --boot-disk-type "pd-ssd" \
+    --boot-disk-device-name "sig-windows-worker-linux"
+```
+
+When it's ready, SSH into it:
+```sh
+gcloud compute ssh --zone "us-east1-d" "sig-windows-worker-linux"
+```
+
+**ATTENTION**: From now on, it's assumed you're logged-in as `root`.
+
+Since we'll need Docker, let's install it:
+```sh
+curl -fsSL https://yum.dockerproject.org/gpg | apt-key add -
+echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > sudo tee /etc/apt/sources.list.d/docker.list
+
+apt-get update
+apt-get install -y docker.io
+```
+
+We also need to download the contents of this repository which will be used shortly:
+```sh
+cd ~
+git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
+cd kubernetes-ovn-heterogeneous-cluster/deb
+
+dpkg -i openvswitch-common_2.6.2-1_amd64.deb \
+openvswitch-datapath-dkms_2.6.2-1_all.deb \
+openvswitch-switch_2.6.2-1_amd64.deb \
+ovn-common_2.6.2-1_amd64.deb \
+ovn-central_2.6.2-1_amd64.deb \
+ovn-docker_2.6.2-1_amd64.deb \
+ovn-host_2.6.2-1_amd64.deb \
+python-openvswitch_2.6.2-1_all.deb
+```
+
+Finally, reboot:
+```sh
+reboot
+```
+
+SSH again into the machine and let's proceed.
+
+**TODO** is this still needed after the reboot?
+```
+rmmod openvswitch
+insmod /lib/modules/$(uname -r)/updates/dkms/openvswitch.ko
+modprobe vport-geneve
+```
+
+Create the OVS bridge interface:
+```sh
+ovs-vsctl add-br br-int
+
+export TUNNEL_MODE=geneve
+export LOCAL_IP=10.142.0.3
+export MASTER_IP=10.142.0.2
+
+ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \
+  external_ids:ovn-nb="tcp:$MASTER_IP:6641" \
+  external_ids:ovn-encap-ip="$LOCAL_IP" \
+  external_ids:ovn-encap-type="$TUNNEL_MODE"
+
+ovs-vsctl get Open_vSwitch . external_ids
+```
+
+Then, proceed to set-up Kubernetes:
+```sh
+cd ~/kubernetes-ovn-heterogeneous-cluster/node
+
+# TODO copy the two CA files below from master
+chmod 600 /etc/kubernetes/tls/ca-key.pem
+chmod 660 /etc/kubernetes/tls/ca.pem
+chgrp kube-cert /etc/kubernetes/*
+
+./linux-make-certs
+
+mkdir -p /etc/kubernetes
+cp -R manifests /etc/kubernetes/
+
+cp kubeconfig.yaml /etc/kubernetes/
+
+cp -R systemd/*.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable kubelet
+systemctl start kubelet
+```
+
+```sh
+ovs-vsctl set Open_vSwitch . external_ids:k8s-api-server="10.142.0.2:8080"
+
+ovs-vsctl set Open_vSwitch . \
+  external_ids:k8s-api-server="https://10.142.0.2" \
+  external_ids:k8s-ca-certificate="/etc/kubernetes/tls/ca.pem" \
+  external_ids:k8s-api-token="/etc/kubernetes/tls/node.pem"
+
+mkdir -p /opt/cni/bin && cd /opt/cni/bin
+curl -Lskj -o cni.tar.gz https://github.com/containernetworking/cni/releases/download/v0.4.0/cni-v0.4.0.tgz
+tar zxf cni.tar.gz
+rm -f cni.tar.gz
+
+apt-get install -y python-pip
+git clone https://github.com/openvswitch/ovn-kubernetes
+cd ovn-kubernetes
+pip install --prefix=/usr/local .
+
+ovn-k8s-overlay minion-init \
+  --cluster-ip-subnet="10.244.0.0/16" \
+  --minion-switch-subnet="10.244.2.0/24" \
+  --node-name="10.142.0.3"
+```
+
+By this time, your Linux worker node is ready:
+```
+kubectl get nodes
+kubectl -n kube-system get pods
+```
+
+Let's proceed to setup the Windows worker node.
 
 ## Worker (Windows)
 
