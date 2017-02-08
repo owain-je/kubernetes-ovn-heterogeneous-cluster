@@ -335,8 +335,11 @@ DEB_BUILD_OPTIONS='nocheck' fakeroot debian/rules binary
 
 ## TODO
 
+- [ ] Copy CA files from master.
 - [ ] `etcd` container should use a host path for storing data, in order to survive restarts.
+- [ ] Linux worker node doesn't need the same OVS/OVN packages installed as the master node.
 - [ ] Automate certificate generation based on node type and IP.
 - [ ] Template all the things.
 - [ ] Add other cloud providers documentation, e.g. AWS.
 - [ ] Add gateway node instructions for enabling pod containers Internet access.
+- [ ] Setup OVS TLS.
