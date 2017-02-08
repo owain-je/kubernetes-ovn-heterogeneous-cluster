@@ -165,7 +165,13 @@ systemctl enable ovn-k8s-watcher
 systemctl start ovn-k8s-watcher
 ```
 
-By this time, your master node is ready. Let's proceed to set-up the worker nodes.
+By this time, your master node is ready:
+```
+kubectl get nodes
+kubectl -n kube-system get pods
+```
+
+Let's proceed to set-up the worker nodes.
 
 ## Worker (Linux)
 
