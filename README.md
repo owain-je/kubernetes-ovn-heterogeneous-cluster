@@ -128,6 +128,9 @@ cd ~/kubernetes-ovn-heterogeneous-cluster
 
 ./make-certs
 
+mkdir -p /etc/kubernetes
+cp -R master/manifests /etc/kubernetes/
+
 systemctl enable kubelet
 systemctl start kubelet
 
