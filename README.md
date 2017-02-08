@@ -10,7 +10,8 @@ This document describes, step-by-step, how to provision a Kubernetes cluster com
 Many thanks to the great people that helped achieve this, namely:
 * Alin Serdean (Cloudbase Solutions)
 * Alin Balutoiu (Cloudbase Solutions)
-* 
+* Feng Min (Google)
+* Peter Hornyack (Google)
 
 ## Requirements
 
