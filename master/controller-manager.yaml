@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-controller-manager
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: kube-controller-manager
+    image: gcr.io/google_containers/hyperkube-amd64:v1.5.2
+    command:
+      - /hyperkube
+      - controller-manager
+      - --master=http://10.142.0.2:8080
+      - --cluster-cidr=10.244.0.0/16
+      - --service-account-private-key-file=/etc/kubernetes/tls/apiserver-key.pem
+      - --root-ca-file=/etc/kubernetes/tls/ca.pem
+      - --cluster-signing-cert-file=/etc/kubernetes/tls/ca.pem
+      - --cluster-signing-key-file=/etc/kubernetes/tls/ca-key.pem
+      - --insecure-experimental-approve-all-kubelet-csrs-for-group=system:kubelet-bootstrap
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /healthz
+        port: 10252
+      initialDelaySeconds: 15
+      timeoutSeconds: 1
+    volumeMounts:
+    - mountPath: /etc/kubernetes/tls
+      name: tls-certs-kubernetes
+      readOnly: true
+    - mountPath: /etc/tls/certs
+      name: tls-certs-host
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/tls
+    name: tls-certs-kubernetes
+  - hostPath:
+      path: /usr/share/ca-certificates
+    name: tls-certs-host
