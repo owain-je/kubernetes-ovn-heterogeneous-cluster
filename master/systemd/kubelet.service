@@ -1,0 +1,35 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+[Service]
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
+ExecStartPre=-/usr/bin/docker rm -f kubelet
+ExecStart=/usr/bin/docker run \
+    --volume=/:/rootfs:ro \
+    --volume=/sys:/sys:ro \
+    --volume=/etc/kubernetes:/etc/kubernetes:ro \
+    --volume=/var/lib/docker/:/var/lib/docker:rw \
+    --volume=/var/lib/kubelet/:/var/lib/kubelet:rw \
+    --volume=/var/run:/var/run:rw \
+    --net=host \
+    --pid=host \
+    --privileged=true \
+    --name=kubelet \
+    -d \
+    gcr.io/google_containers/hyperkube-amd64:v1.5.2 \
+    /hyperkube kubelet \
+        --address=10.142.0.2 \
+        --api-servers=http://127.0.0.1:8080 \
+        --network-plugin-dir=/etc/kubernetes/cni/net.d \
+        --network-plugin= \
+        --register-schedulable=false \
+        --allow-privileged=true \
+        --pod-manifest-path=/etc/kubernetes/manifests \
+        --hostname-override=10.142.0.2 \
+        --cluster_dns=10.100.0.10 \
+        --cluster_domain=cluster.local
+Restart=on-failure
+RestartSec=10
+WorkingDirectory=/root/
+[Install]
+WantedBy=multi-user.target

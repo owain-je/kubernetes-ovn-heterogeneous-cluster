@@ -1,0 +1,15 @@
+[Unit]
+Description=OVN watches the Kubernetes API
+Documentation=https://github.com/openvswitch/ovn-kubernetes#watchers-on-master-node
+[Service]
+ExecStart=/usr/local/bin/ovn-k8s-watcher \
+  --overlay \
+  --pidfile \
+  --log-file \
+  -vfile:info \
+  -vconsole:emer
+Restart=on-failure
+RestartSec=10
+WorkingDirectory=/root/
+[Install]
+WantedBy=multi-user.target
