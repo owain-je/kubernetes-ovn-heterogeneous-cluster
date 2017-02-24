@@ -133,7 +133,7 @@ cp -R manifests /etc/kubernetes/
 systemctl enable kubelet
 systemctl start kubelet
 
-curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kubectl
+curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.5.3/bin/linux/amd64/kubectl
 chmod +x /usr/bin/kubectl
 
 kubectl config set-cluster default-cluster --server=https://10.142.0.2 --certificate-authority=/etc/kubernetes/tls/ca.pem
@@ -255,7 +255,7 @@ ovs-vsctl get Open_vSwitch . external_ids
 
 Then, proceed to set-up Kubernetes:
 ```sh
-cd ~/kubernetes-ovn-heterogeneous-cluster/node
+cd ~/kubernetes-ovn-heterogeneous-cluster/worker/linux
 
 # TODO copy the two CA files below from master
 chmod 600 /etc/kubernetes/tls/ca-key.pem
@@ -275,13 +275,19 @@ systemctl enable kubelet
 systemctl start kubelet
 ```
 
+One will need `kubectl` as well:
 ```sh
-ovs-vsctl set Open_vSwitch . external_ids:k8s-api-server="10.142.0.2:8080"
++curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.5.3/bin/linux/amd64/kubectl
+chmod +x /usr/bin/kubectl
+ ```
 
+```sh
+export APISERVER=$(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml config view | grep server | cut -f 2- -d ":" | tr -d " ")
+export TOKEN=$(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml describe secret $(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
 ovs-vsctl set Open_vSwitch . \
-  external_ids:k8s-api-server="https://10.142.0.2" \
+  external_ids:k8s-api-server="$APISERVER" \
   external_ids:k8s-ca-certificate="/etc/kubernetes/tls/ca.pem" \
-  external_ids:k8s-api-token="/etc/kubernetes/tls/node.pem"
+  external_ids:k8s-api-token="$TOKEN"
 
 mkdir -p /opt/cni/bin && cd /opt/cni/bin
 curl -Lskj -o cni.tar.gz https://github.com/containernetworking/cni/releases/download/v0.4.0/cni-v0.4.0.tgz
