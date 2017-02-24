@@ -2,9 +2,9 @@
 Description=Etcd store
 Documentation=https://github.com/coreos/etcd
 [Service]
-ExecStart=/usr/bin/docker run --name etcd 
+ExecStart=/usr/bin/docker run --name etcd
   --net=host \
-  quay.io/coreos/etcd:v3.1.0
+  quay.io/coreos/etcd:v3.1.1
 Restart=on-failure
 RestartSec=10
 [Install]
