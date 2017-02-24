@@ -7,7 +7,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-apiserver
-    image: gcr.io/google_containers/hyperkube-amd64:v1.5.2
+    image: gcr.io/google_containers/hyperkube-amd64:v1.5.3
     command:
       - /hyperkube
       - apiserver
