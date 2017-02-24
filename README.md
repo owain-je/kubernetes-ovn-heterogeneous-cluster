@@ -14,6 +14,17 @@ Many thanks to the great people that helped achieve this, namely:
 * Peter Hornyack (Google)
 * The authors of https://github.com/openvswitch/ovn-kubernetes
 
+## TODO
+
+The following items are to be implemented and are not sorted by importance!
+
+* Copy CA files from master.
+* `etcd` container should use a host path for storing data, in order to survive restarts.
+* Add other cloud providers documentation, e.g. AWS.
+* Add gateway node instructions for enabling pod containers Internet access.
+* Setup OVS TLS.
+* Add Windows node TLS support.
+
 ## Requirements
 
 At the time of this writing, the instructions are meant to be run on Google Compute Engine, but apart from `gcloud` calls and a few networking details, everything detailed below should work regardless of the adopted cloud-provider.
@@ -530,14 +541,3 @@ dpkg-checkbuilddeps
 
 DEB_BUILD_OPTIONS='nocheck' fakeroot debian/rules binary
 ```
-
-## TODO
-
-The following items are not sorted by importance!
-
-* Copy CA files from master.
-* `etcd` container should use a host path for storing data, in order to survive restarts.
-* Add other cloud providers documentation, e.g. AWS.
-* Add gateway node instructions for enabling pod containers Internet access.
-* Setup OVS TLS.
-* Add Windows node TLS support.
