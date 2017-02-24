@@ -3,22 +3,9 @@ Description=Kubernetes Kubelet
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 [Service]
 ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
-ExecStartPre=-/usr/bin/docker rm -f kubelet
-ExecStart=/usr/bin/docker run \
-    --volume=/:/rootfs:ro \
-    --volume=/sys:/sys:ro \
-    --volume=/etc/kubernetes:/etc/kubernetes:ro \
-    --volume=/var/lib/docker/:/var/lib/docker:rw \
-    --volume=/var/lib/kubelet/:/var/lib/kubelet:shared \
-    --volume=/var/run:/var/run:rw \
-    --net=host \
-    --pid=host \
-    --privileged=true \
-    --name=kubelet \
-    -d \
-    gcr.io/google_containers/hyperkube-amd64:v__K8s_VERSION__ \
-    /hyperkube kubelet \
-        --containerized \
+ExecStartPre=/usr/bin/curl -Lskj -o /usr/local/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v__K8S_VERSION__/bin/linux/amd64/kubelet
+ExecStartPre=/bin/chmod +x /usr/local/bin/kubelet
+ExecStart=/usr/local/bin/kubelet \
         --api-servers=https://__MASTER_IP__ \
         --address=__LOCAL_IP__ \
         --network-plugin=cni \
