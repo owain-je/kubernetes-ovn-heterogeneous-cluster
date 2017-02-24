@@ -7,14 +7,14 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-proxy
-    image: gcr.io/google_containers/hyperkube-amd64:v1.5.3
+    image: gcr.io/google_containers/hyperkube-amd64:v__K8S_VERSION__
     command:
       - /hyperkube
       - proxy
-      - --master=http://10.142.0.2:8080
+      - --master=http://__MASTER_IP__:8080
       - --proxy-mode=iptables
-      - --hostname-override=10.142.0.2
-      - --cluster-cidr=10.244.0.0/16
+      - --hostname-override=__MASTER_IP__
+      - --cluster-cidr=__K8S_POD_SUBNET__
     securityContext:
       privileged: true
     volumeMounts:

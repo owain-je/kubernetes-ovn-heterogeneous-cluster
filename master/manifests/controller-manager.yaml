@@ -7,12 +7,12 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-controller-manager
-    image: gcr.io/google_containers/hyperkube-amd64:v1.5.3
+    image: gcr.io/google_containers/hyperkube-amd64:v__K8S_VERSION__
     command:
       - /hyperkube
       - controller-manager
-      - --master=http://10.142.0.2:8080
-      - --cluster-cidr=10.244.0.0/16
+      - --master=http://__MASTER_IP__:8080
+      - --cluster-cidr=__K8S_POD_SUBNET__
       - --service-account-private-key-file=/etc/kubernetes/tls/apiserver-key.pem
       - --root-ca-file=/etc/kubernetes/tls/ca.pem
       - --cluster-signing-cert-file=/etc/kubernetes/tls/ca.pem

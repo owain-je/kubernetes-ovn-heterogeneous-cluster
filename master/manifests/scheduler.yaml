@@ -7,11 +7,11 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-scheduler
-    image: gcr.io/google_containers/hyperkube-amd64:v1.5.3
+    image: gcr.io/google_containers/hyperkube-amd64:v__K8S_VERSION__
     command:
       - /hyperkube
       - scheduler
-      - --master=http://10.142.0.2:8080
+      - --master=http://__MASTER_IP__:8080
       - --leader-elect=true
     livenessProbe:
       httpGet:
