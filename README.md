@@ -142,6 +142,8 @@ sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/manifests/*.yaml
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/openssl.cnf
 
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/openssl.cnf
 
 sed -i"*" "s|__K8S_API_SERVICE_IP__|$K8S_API_SERVICE_IP|g" tmp/openssl.cnf
@@ -183,13 +185,20 @@ kubectl config use-context local
 
 Now, let's configure pod networking for this node:
 ```sh
-ovs-vsctl set Open_vSwitch . external_ids:k8s-api-server="$MASTER_IP:8080"
+export TOKEN=$(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
+
+ovs-vsctl set Open_vSwitch . \
+  external_ids:k8s-api-server="https://$MASTER_IP" \
+  external_ids:k8s-api-token="$TOKEN"
+
+ln -fs /etc/kubernetes/tls/ca.pem /etc/openvswitch/k8s-ca.crt
 
 apt-get install -y python-pip
+
 cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
-pip install --prefix=/usr/local .
+pip install --upgrade --prefix=/usr/local --ignore-installed .
 
 ovn-k8s-overlay master-init \
   --cluster-ip-subnet="$K8S_POD_SUBNET" \
@@ -231,7 +240,7 @@ Let's proceed to set-up the worker nodes.
 
 ### Node set-up
 
-Let's provision the master VM:
+Let's provision the Linux worker VM:
 ```sh
 gcloud compute instances create "sig-windows-worker-linux" \
     --zone "us-east1-d" \
@@ -253,17 +262,14 @@ gcloud compute ssh --zone "us-east1-d" "sig-windows-worker-linux"
 
 **ATTENTION**: From now on, it's assumed you're logged-in as `root`.
 
-Since we'll need Docker, let's install it:
+Let's install OVS/OVN:
 ```sh
 curl -fsSL https://yum.dockerproject.org/gpg | apt-key add -
 echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > sudo tee /etc/apt/sources.list.d/docker.list
 
 apt-get update
 apt-get install -y docker.io dkms
-```
 
-We also need to download the contents of this repository which will be used shortly:
-```sh
 cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
@@ -306,41 +312,82 @@ ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \
 ovs-vsctl get Open_vSwitch . external_ids
 ```
 
-Then, proceed to set-up Kubernetes:
+You should see something like:
+```
+{hostname=sig-windows-worker-linux-1.c.apprenda-project-one.internal, ovn-encap-ip="10.142.0.3", ovn-encap-type=geneve, ovn-nb="tcp:10.142.0.2:6641", ovn-remote="tcp:10.142.0.2:6642", system-id="c6364c4c-8069-4bfd-ace8-ec701572feb7"}
+```
+
+We are now ready to set-up Kubernetes Linux worker node.
+
+### Kubernetes set-up
+
+**Attention**: You **must** copy the CA keypair that's available in the master node over the following paths:
+* /etc/kubernetes/tls/ca.pem
+* /etc/kubernetes/tls/ca-key.pem
+
+When it's done, proceed with the following:
 ```sh
 cd ~/kubernetes-ovn-heterogeneous-cluster/worker/linux
 
-# TODO copy the two CA files below from master
-chmod 600 /etc/kubernetes/tls/ca-key.pem
-chmod 660 /etc/kubernetes/tls/ca.pem
-chgrp kube-cert /etc/kubernetes/*
+rm -rf tmp
+mkdir tmp
+cp -R ../make-certs ../openssl.cnf ../kubeconfig.yaml manifests systemd tmp/
 
-./linux-make-certs
+export K8S_VERSION=1.5.3
+export K8S_POD_SUBNET=10.244.0.0/16
+export K8S_NODE_POD_SUBNET=10.244.2.0/24
+export K8S_DNS_DOMAIN=cluster.local
+export MASTER_IP=10.142.0.2
+export LOCAL_IP=10.142.0.3
+export HOSTNAME=`hostname`
 
-mkdir -p /etc/kubernetes
-cp -R manifests /etc/kubernetes/
+sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/manifests/proxy.yaml
+sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/systemd/kubelet.service
 
-cp kubeconfig.yaml /etc/kubernetes/
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/manifests/proxy.yaml
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/openssl.cnf
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/kubeconfig.yaml
 
-cp -R systemd/*.service /etc/systemd/system/
+sed -i"*" "s|__LOCAL_IP__|$LOCAL_IP|g" tmp/manifests/proxy.yaml
+sed -i"*" "s|__LOCAL_IP__|$LOCAL_IP|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__LOCAL_IP__|$LOCAL_IP|g" tmp/openssl.cnf
+
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
+
+sed -i"*" "s|__K8S_POD_SUBNET__|$K8S_POD_SUBNET|g" tmp/manifests/proxy.yaml
+
+sed -i"*" "s|__K8S_DNS_SERVICE_IP__|$K8S_DNS_SERVICE_IP|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__K8S_DNS_DOMAIN__|$K8S_DNS_DOMAIN|g" tmp/systemd/kubelet.service
+
+cd tmp
+chmod +x make-certs
+./make-certs
+cd ..
+
+cp -R tmp/manifests /etc/kubernetes/
+
+cp tmp/kubeconfig.yaml /etc/kubernetes/
+
+cp -R tmp/systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable kubelet
-systemctl start kubelet
 ```
 
 One will need `kubectl` as well:
 ```sh
-+curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.5.3/bin/linux/amd64/kubectl
+curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v$K8S_VERSION/bin/linux/amd64/kubectl
 chmod +x /usr/bin/kubectl
  ```
 
 ```sh
-export APISERVER=$(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml config view | grep server | cut -f 2- -d ":" | tr -d " ")
 export TOKEN=$(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml describe secret $(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
+
 ovs-vsctl set Open_vSwitch . \
-  external_ids:k8s-api-server="$APISERVER" \
-  external_ids:k8s-ca-certificate="/etc/kubernetes/tls/ca.pem" \
+  external_ids:k8s-api-server="https://$MASTER_IP" \
   external_ids:k8s-api-token="$TOKEN"
+
+ln -fs /etc/kubernetes/tls/ca.pem /etc/openvswitch/k8s-ca.crt
 
 mkdir -p /opt/cni/bin && cd /opt/cni/bin
 curl -Lskj -o cni.tar.gz https://github.com/containernetworking/cni/releases/download/v0.4.0/cni-v0.4.0.tgz
@@ -348,20 +395,27 @@ tar zxf cni.tar.gz
 rm -f cni.tar.gz
 
 apt-get install -y python-pip
+
+cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
-pip install --prefix=/usr/local .
+pip install --upgrade --prefix=/usr/local --ignore-installed .
 
 ovn-k8s-overlay minion-init \
-  --cluster-ip-subnet="10.244.0.0/16" \
-  --minion-switch-subnet="10.244.2.0/24" \
-  --node-name="10.142.0.3"
+  --cluster-ip-subnet="$K8S_POD_SUBNET" \
+  --minion-switch-subnet="$K8S_NODE_POD_SUBNET" \
+  --node-name="$HOSTNAME"
 ```
 
-By this time, your Linux worker node is ready:
-```
-kubectl get nodes
-kubectl -n kube-system get pods
+By this time, your Linux worker node is ready to run Kubernete workloads:
+```sh
+systemctl enable kubelet
+systemctl start kubelet
+
+kubectl config set-cluster default-cluster --server=https://$MASTER_IP --certificate-authority=/etc/kubernetes/tls/ca.pem
+kubectl config set-credentials default-admin --certificate-authority=/etc/kubernetes/tls/ca.pem --client-key=/etc/kubernetes/tls/node-key.pem --client-certificate=/etc/kubernetes/tls/node.pem
+kubectl config set-context local --cluster=default-cluster --user=default-admin
+kubectl config use-context local
 ```
 
 Let's proceed to setup the Windows worker node.
