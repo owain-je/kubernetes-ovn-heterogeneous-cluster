@@ -18,6 +18,7 @@ pem_node_key=$cert_dir/node-key.pem
 pem_node_csr=$cert_dir/node-csr.pem
 
 # Make sure cert group exists
+groupdel $cert_group
 groupadd -r $cert_group
 
 # Generate TLS artifacts
