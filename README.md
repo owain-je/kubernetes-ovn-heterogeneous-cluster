@@ -77,19 +77,17 @@ ovn-host_2.6.2-1_amd64.deb \
 python-openvswitch_2.6.2-1_all.deb
 ```
 
+We'll need to make sure `vport_geneve` kernel module is loaded at boot:
+```sh
+echo vport_geneve >> /etc/modules-load.d/modules.conf
+```
+
 Finally, reboot:
 ```sh
 reboot
 ```
 
 SSH again into the machine and let's proceed.
-
-**TODO** is this still needed after the reboot?
-```
-rmmod openvswitch
-insmod /lib/modules/$(uname -r)/updates/dkms/openvswitch.ko
-modprobe vport-geneve
-```
 
 Create the OVS bridge interface:
 ```sh
@@ -227,19 +225,17 @@ ovn-host_2.6.2-1_amd64.deb \
 python-openvswitch_2.6.2-1_all.deb
 ```
 
+We'll need to make sure `vport_geneve` kernel module is loaded at boot:
+```sh
+echo vport_geneve >> /etc/modules-load.d/modules.conf
+```
+
 Finally, reboot:
 ```sh
 reboot
 ```
 
 SSH again into the machine and let's proceed.
-
-**TODO** is this still needed after the reboot?
-```
-rmmod openvswitch
-insmod /lib/modules/$(uname -r)/updates/dkms/openvswitch.ko
-modprobe vport-geneve
-```
 
 Create the OVS bridge interface:
 ```sh
