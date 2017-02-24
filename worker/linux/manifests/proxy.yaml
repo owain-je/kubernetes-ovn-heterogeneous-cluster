@@ -11,11 +11,11 @@ spec:
     command:
       - /hyperkube
       - proxy
-      - --master=https://10.142.0.2
+      - --master=https://__MASTER_IP__
       - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
       - --proxy-mode=iptables
-      - --hostname-override=10.142.0.3
-      - --cluster-cidr=10.244.0.0/16
+      - --hostname-override=__LOCAL_IP__
+      - --cluster-cidr=__K8S_POD_SUBNET__
     securityContext:
       privileged: true
     volumeMounts:

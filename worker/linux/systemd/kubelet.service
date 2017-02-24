@@ -16,18 +16,18 @@ ExecStart=/usr/bin/docker run \
     --privileged=true \
     --name=kubelet \
     -d \
-    gcr.io/google_containers/hyperkube-amd64:v1.5.3 \
+    gcr.io/google_containers/hyperkube-amd64:v__K8s_VERSION__ \
     /hyperkube kubelet \
         --containerized \
-        --api-servers=https://10.142.0.2 \
-        --address=10.142.0.3 \
+        --api-servers=https://__MASTER_IP__ \
+        --address=__LOCAL_IP__ \
         --network-plugin=cni \
         --network-plugin-dir=/etc/cni/net.d \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
-        --hostname-override=10.142.0.3 \
-        --cluster_dns=10.100.0.10 \
-        --cluster_domain=cluster.local \
+        --hostname-override=__LOCAL_IP__ \
+        --cluster_dns=__K8S_DNS_SERVICE_IP__ \
+        --cluster_domain=__K8S_DNS_DOMAIN__ \
         --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
         --tls-cert-file=/etc/kubernetes/tls/node.pem \
         --tls-private-key-file=/etc/kubernetes/tls/node-key.pem
