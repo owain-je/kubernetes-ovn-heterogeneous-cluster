@@ -16,7 +16,10 @@ Many thanks to the great people that helped achieve this, namely:
 
 ## Requirements
 
-* Use Google Cloud Platform (GCP) , namely Google Compute Engine (GCE) VMs.
+At the time of this writing, the instructions are meant to be run on Google Compute Engine, but apart from `gcloud` calls and a few networking details, everything detailed below should work regardless of the adopted cloud-provider.
+
+Having that said, here are the requirements:
+* Use Google Cloud Platform (GCP), namely Google Compute Engine (GCE) VMs.
   * `gcloud` CLI tool
 * Linux machines(s) run Ubuntu 16.04 with latest updates.
 * Windows machine(s) run Windows Server 2016 with latest updates.
