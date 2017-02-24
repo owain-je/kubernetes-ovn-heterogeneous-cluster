@@ -311,6 +311,13 @@ Let's proceed to setup the Windows worker node.
 
 **TODO**
 
+## Troubleshooting
+
+Look in [ovn-kubernetes issues](https://github.com/openvswitch/ovn-kubernetes/issues) first. Some problems we found are:
+* https://github.com/openvswitch/ovn-kubernetes/issues/79
+* https://github.com/openvswitch/ovn-kubernetes/issues/80
+* https://github.com/openvswitch/ovn-kubernetes/issues/82
+
 ## (Optional) Build packages
 
 ### OVS/OVN
