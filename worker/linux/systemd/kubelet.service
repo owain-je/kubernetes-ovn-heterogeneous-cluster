@@ -16,7 +16,7 @@ ExecStart=/usr/bin/docker run \
     --privileged=true \
     --name=kubelet \
     -d \
-    gcr.io/google_containers/hyperkube-amd64:v1.5.2 \
+    gcr.io/google_containers/hyperkube-amd64:v1.5.3 \
     /hyperkube kubelet \
         --containerized \
         --api-servers=https://10.142.0.2 \
