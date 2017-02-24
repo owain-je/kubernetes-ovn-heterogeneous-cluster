@@ -18,18 +18,17 @@ pem_admin_key=$cert_dir/admin-key.pem
 pem_admin_csr=$cert_dir/admin-csr.pem
 
 # Make sure cert group exists
-groupdel $cert_group
 groupadd -r $cert_group
 
 # Generate TLS artifacts
 mkdir -p "$cert_dir"
 rm -rf "$cert_dir/*"
 
-openssl genrsa -out $pem_ca_key 2048 
+openssl genrsa -out $pem_ca_key 2048
 openssl req -x509 -new -nodes -key $pem_ca_key -days 10000 -out $pem_ca -subj "/CN=kube-ca"
 
 openssl genrsa -out $pem_server_key 2048
-openssl req -new -key $pem_server_key -out $pem_server_csr -subj "/CN=kube-apiserver" -config openssl.cnf
+openssl req -new -key $pem_server_key -out $pem_server_csr -subj "/CN=__HOSTNAME__" -config openssl.cnf
 openssl x509 -req -in $pem_server_csr -CA $pem_ca -CAkey $pem_ca_key -CAcreateserial -out $pem_server -days 365 -extensions v3_req -extfile openssl.cnf
 
 # Make server certs accessible to apiserver.
