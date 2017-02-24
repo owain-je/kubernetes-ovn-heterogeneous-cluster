@@ -26,6 +26,12 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
         scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
     spec:
+      volumes:
+      - name: kube-dns-config
+        # TODO enable with Kubernetes 1.6
+        #configMap:
+          #name: kube-dns
+          #optional: true
       containers:
       - name: kubedns
         image: gcr.io/google_containers/k8s-dns-kube-dns-amd64:__K8S_DNS_VERSION__
@@ -60,7 +66,7 @@ spec:
         args:
         - --domain=__K8S_DNS_DOMAIN__.
         - --dns-port=10053
-        - --config-map=kube-dns
+        - --config-dir=/kube-dns-config
         - --v=2
         env:
         - name: PROMETHEUS_PORT
@@ -75,6 +81,9 @@ spec:
         - containerPort: 10055
           name: metrics
           protocol: TCP
+        volumeMounts:
+        - name: kube-dns-config
+          mountPath: /kube-dns-config
       - name: dnsmasq
         image: gcr.io/google_containers/k8s-dns-dnsmasq-amd64:__K8S_DNS_VERSION__
         livenessProbe:
@@ -88,8 +97,9 @@ spec:
           failureThreshold: 5
         args:
         - --cache-size=1000
-        - --no-resolv
-        - --server=127.0.0.1#10053
+        - --server=/__K8S_DNS_DOMAIN__/127.0.0.1#10053
+        - --server=/in-addr.arpa/127.0.0.1#10053
+        - --server=/ip6.arpa/127.0.0.1#10053
         - --log-facility=-
         ports:
         - containerPort: 53
