@@ -13,7 +13,7 @@ spec:
       - proxy
       - --master=http://__MASTER_IP__:8080
       - --proxy-mode=iptables
-      - --hostname-override=__MASTER_IP__
+      - --hostname-override=__HOSTNAME__
       - --cluster-cidr=__K8S_POD_SUBNET__
     securityContext:
       privileged: true

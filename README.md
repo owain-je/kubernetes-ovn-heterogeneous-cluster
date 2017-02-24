@@ -153,6 +153,7 @@ sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/manifests/*.yaml
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/openssl.cnf
 
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/manifests/proxy.yaml
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/openssl.cnf
@@ -364,6 +365,7 @@ sed -i"*" "s|__LOCAL_IP__|$LOCAL_IP|g" tmp/manifests/proxy.yaml
 sed -i"*" "s|__LOCAL_IP__|$LOCAL_IP|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__LOCAL_IP__|$LOCAL_IP|g" tmp/openssl.cnf
 
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/manifests/proxy.yaml
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
 

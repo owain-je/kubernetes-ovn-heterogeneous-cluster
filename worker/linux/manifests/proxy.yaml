@@ -14,7 +14,7 @@ spec:
       - --master=https://__MASTER_IP__
       - --kubeconfig=/etc/kubernetes/kubeconfig.yaml
       - --proxy-mode=iptables
-      - --hostname-override=__LOCAL_IP__
+      - --hostname-override=__HOSTNAME__
       - --cluster-cidr=__K8S_POD_SUBNET__
     securityContext:
       privileged: true
