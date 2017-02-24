@@ -210,6 +210,9 @@ apt-get install -y python-pip
 cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
+
+# Before proceeding: https://github.com/openvswitch/ovn-kubernetes/pull/86
+
 pip install --upgrade --prefix=/usr/local --ignore-installed .
 
 ovn-k8s-overlay master-init \
@@ -412,6 +415,9 @@ apt-get install -y python-pip
 cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
+
+# Before proceeding: https://github.com/openvswitch/ovn-kubernetes/pull/86
+
 pip install --upgrade --prefix=/usr/local --ignore-installed .
 
 ovn-k8s-overlay minion-init \
