@@ -12,6 +12,7 @@ Many thanks to the great people that helped achieve this, namely:
 * Alin Balutoiu (Cloudbase Solutions)
 * Feng Min (Google)
 * Peter Hornyack (Google)
+* The authors of https://github.com/openvswitch/ovn-kubernetes
 
 ## Requirements
 
