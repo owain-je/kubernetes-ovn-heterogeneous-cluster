@@ -21,8 +21,8 @@ ExecStart=/usr/bin/docker run \
         --containerized \
         --api-servers=https://10.142.0.2 \
         --address=10.142.0.3 \
-        --network-plugin-dir=/etc/kubernetes/cni/net.d \
-        --network-plugin= \
+        --network-plugin=cni \
+        --network-plugin-dir=/etc/cni/net.d \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
         --hostname-override=10.142.0.3 \

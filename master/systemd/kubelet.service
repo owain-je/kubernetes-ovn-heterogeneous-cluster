@@ -20,8 +20,6 @@ ExecStart=/usr/bin/docker run \
     /hyperkube kubelet \
         --address=10.142.0.2 \
         --api-servers=http://127.0.0.1:8080 \
-        --network-plugin-dir=/etc/kubernetes/cni/net.d \
-        --network-plugin= \
         --register-schedulable=false \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
