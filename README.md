@@ -52,17 +52,14 @@ gcloud compute ssh --zone "us-east1-d" "sig-windows-master"
 
 **ATTENTION**: From now on, it's assumed you're logged-in as `root`.
 
-Since we'll need Docker, let's install it:
+Let's install OVS/OVN:
 ```sh
 curl -fsSL https://yum.dockerproject.org/gpg | apt-key add -
 echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > sudo tee /etc/apt/sources.list.d/docker.list
 
 apt-get update
 apt-get install -y docker.io dkms
-```
 
-We also need to download the contents of this repository which will be used shortly:
-```sh
 cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
@@ -107,7 +104,7 @@ ovs-vsctl get Open_vSwitch . external_ids
 
 You should see something like:
 ```
-{hostname=sig-windows-master.c.apprenda-project-one.internal, "k8s-api-server"="127.0.0.1:8080", ovn-encap-ip="10.142.0.2", ovn-encap-type=geneve, ovn-nb="tcp:10.142.0.2:6641", ovn-remote="tcp:10.142.0.2:6642", system-id="e7af27f6-a218-40bb-8d4f-af67600abd17"}
+{hostname=sig-windows-master.c.apprenda-project-one.internal, ovn-encap-ip="10.142.0.2", ovn-encap-type=geneve, ovn-nb="tcp:10.142.0.2:6641", ovn-remote="tcp:10.142.0.2:6642", system-id="e7af27f6-a218-40bb-8d4f-af67600abd17"}
 ```
 
 We are now ready to set-up Kubernetes master node.
@@ -161,7 +158,10 @@ systemctl daemon-reload
 systemctl enable etcd3
 systemctl start etcd3
 
-./tmp/make-certs
+cd tmp
+chmod +x make-certs
+make-certs
+cd ..
 
 mkdir -p /etc/kubernetes
 cp -R tmp/manifests /etc/kubernetes/
@@ -176,12 +176,9 @@ kubectl config set-cluster default-cluster --server=https://$MASTER_IP --certifi
 kubectl config set-credentials default-admin --certificate-authority=/etc/kubernetes/tls/ca.pem --client-key=/etc/kubernetes/tls/admin-key.pem --client-certificate=/etc/kubernetes/tls/admin.pem
 kubectl config set-context local --cluster=default-cluster --user=default-admin
 kubectl config use-context local
-
-kubectl create -f tmp/kubedns-deployment.yaml
-kubectl create -f tmp/kubedns-service.yaml
 ```
 
-Last step is to configure pod networking for this node:
+Now, let's configure pod networking for this node:
 ```sh
 ovs-vsctl set Open_vSwitch . external_ids:k8s-api-server="$MASTER_IP:8080"
 
@@ -200,10 +197,29 @@ systemctl enable ovn-k8s-watcher
 systemctl start ovn-k8s-watcher
 ```
 
-By this time, your master node is ready:
+And deploy Kubernetes DNS:
+```sh
+cd ~/kubernetes-ovn-heterogeneous-cluster/master
+kubectl create -f tmp/kubedns-deployment.yaml
+kubectl create -f tmp/kubedns-service.yaml
 ```
+
+**Note** though that Kubernetes DNS will only become available when a schedulable Kubernetes node joins the cluster.
+
+By this time, the master node is ready:
+```sh
 kubectl get nodes
 kubectl -n kube-system get pods
+```
+
+You should see something like:
+```
+NAME                                 READY     STATUS    RESTARTS   AGE
+kube-apiserver-10.138.0.2            1/1       Running   0          9m
+kube-controller-manager-10.138.0.2   1/1       Running   0          9m
+kube-dns-555682531-5pp48             0/3       Pending   0          1m
+kube-proxy-10.138.0.2                1/1       Running   0          9m
+kube-scheduler-10.138.0.2            1/1       Running   0          9m
 ```
 
 Let's proceed to set-up the worker nodes.
