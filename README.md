@@ -422,7 +422,85 @@ Let's proceed to setup the Windows worker node.
 
 ## Worker (Windows)
 
-**TODO**
+For the sake of simplicity when setting up Windows node, we will not be relying on TLS for now.
+
+### Node set-up
+
+Let's provision the Windows worker VM:
+```sh
+gcloud compute instances create "sig-windows-worker-windows-1" \
+  --zone "us-east1-d" \
+  --machine-type "custom-4-4096" \
+  --subnet "default" \
+  --can-ip-forward \
+  --maintenance-policy "MIGRATE" \
+  --image "windows-server-2016-dc-v20170117" \
+  --image-project "windows-cloud" \
+  --boot-disk-size "50" \
+  --boot-disk-type "pd-ssd" \
+  --boot-disk-device-name "sig-windows-worker-windows-1"
+```
+
+After VM is provisioned, establish a new connection to it. How one does this is out of the scope of this document.
+
+Now, start a new Powershell session with administrator privileges and execute:
+```sh
+cd \
+mkdir ovs
+cd ovs
+
+Start-BitsTransfer https://cloudbase.it/downloads/OpenvSwitch_prerelease.msi
+Start-BitsTransfer https://cloudbase.it/downloads/k8s_ovn_service_prerelease.zip
+
+cmd /c 'msiexec /i OpenvSwitch_prerelease.msi /qn'
+
+netsh netkvm setparam 0 *RscIPv4 0
+netsh netkvm restart 0
+
+Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+Install-Package -Name docker -ProviderName DockerMsftProvider
+```
+
+A reboot is mandatory:
+```sh
+Restart-Computer -Force
+```
+
+Re-establish connection to the VM.
+
+Now, one needs to set-up the overlay (OVN) network. On a per node basis, copy `worker/windows/install_ovn.ps1` over to the Windows node and edit its contents accordingly before running the Powershell script.
+
+Then, start a new Powershell session with administrator privileges and execute:
+```sh
+.\install_ovn.ps1
+```
+
+We are now ready to set-up Kubernetes Windows worker node.
+
+### Kubernetes set-up
+
+On a per node basis, copy `worker/windows/install_k8s.ps1` over to the Windows node and edit its contents accordingly before running the Powershell script.
+
+Now, let's install Kubernetes:
+```sh
+.\install_k8s.ps1
+```
+
+**Attention**: While we don't automate Kubernetes components registration as Windows services, one will need to edit the commands below according to the specifics of the cluster in the making.
+
+Run `kube-proxy`:
+```sh
+New-VMSwitch -Name KubeProxySwitch -SwitchType Internal
+
+$env:INTERFACE_TO_ADD_SERVICE_IP = "KubeProxySwitch"
+.\kube-proxy.exe -v=3 --proxy-mode=userspace --hostname-override=sig-windows-worker-windows-1 --bind-address=10.142.0.5 --master=http://10.142.0.2:8080 --cluster-cidr=10.244.0.0/16
+```
+
+And the `kubelet`:
+```sh
+$env:CONTAINER_NETWORK = "external"
+.\kubelet.exe -v=3 --address=10.142.0.9 --hostname-override=10.142.0.9 --cluster_dns=10.100.0.10 --cluster_domain=cluster.local --pod-infra-container-image="apprenda/pause" --resolv-conf="" --api_servers=http://10.142.0.2:8080
+```
 
 ## Troubleshooting
 
