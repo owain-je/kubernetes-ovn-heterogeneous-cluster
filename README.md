@@ -131,6 +131,7 @@ export K8S_DNS_SERVICE_IP=10.100.0.10
 export K8S_DNS_DOMAIN=cluster.local
 export ETCD_VERSION=3.1.1
 export MASTER_IP=10.142.0.2
+export HOSTNAME=`hostname`
 
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/manifests/*.yaml
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/systemd/kubelet.service
@@ -140,6 +141,8 @@ sed -i"*" "s|__ETCD_VERSION__|$ETCD_VERSION|g" tmp/systemd/etcd3.service
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/manifests/*.yaml
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/openssl.cnf
+
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/openssl.cnf
 
 sed -i"*" "s|__K8S_API_SERVICE_IP__|$K8S_API_SERVICE_IP|g" tmp/openssl.cnf
 
@@ -160,7 +163,7 @@ systemctl start etcd3
 
 cd tmp
 chmod +x make-certs
-make-certs
+./make-certs
 cd ..
 
 mkdir -p /etc/kubernetes
@@ -191,7 +194,7 @@ pip install --prefix=/usr/local .
 ovn-k8s-overlay master-init \
   --cluster-ip-subnet="$K8S_POD_SUBNET" \
   --master-switch-subnet="$K8S_NODE_POD_SUBNET" \
-  --node-name=`hostname`
+  --node-name="$HOSTNAME"
 
 systemctl enable ovn-k8s-watcher
 systemctl start ovn-k8s-watcher
