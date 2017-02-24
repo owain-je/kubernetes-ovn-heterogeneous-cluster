@@ -58,7 +58,7 @@ curl -fsSL https://yum.dockerproject.org/gpg | apt-key add -
 echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > sudo tee /etc/apt/sources.list.d/docker.list
 
 apt-get update
-apt-get install -y docker.io
+apt-get install -y docker.io dkms
 ```
 
 We also need to download the contents of this repository which will be used shortly:
@@ -208,7 +208,7 @@ curl -fsSL https://yum.dockerproject.org/gpg | apt-key add -
 echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > sudo tee /etc/apt/sources.list.d/docker.list
 
 apt-get update
-apt-get install -y docker.io
+apt-get install -y docker.io dkms
 ```
 
 We also need to download the contents of this repository which will be used shortly:
