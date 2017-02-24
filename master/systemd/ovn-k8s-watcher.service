@@ -7,7 +7,7 @@ ExecStart=/usr/local/bin/ovn-k8s-watcher \
   --pidfile \
   --log-file \
   -vfile:info \
-  -vconsole:emer
+  -vconsole:info
 Restart=on-failure
 RestartSec=10
 WorkingDirectory=/root/
