@@ -1,0 +1,16 @@
+[Unit]
+Description=OVN Gateway helper
+Documentation=https://github.com/openvswitch/ovn-kubernetes
+[Service]
+ExecStart=/usr/local/bin/ovn-k8s-gateway-helper \
+  --physical-bridge=br__NIC__ \
+  --physical-interface=__NIC__ \
+  --pidfile \
+  --log-file \
+  -vfile:info \
+  -vconsole:info
+Restart=on-failure
+RestartSec=10
+WorkingDirectory=/root/
+[Install]
+WantedBy=multi-user.target
