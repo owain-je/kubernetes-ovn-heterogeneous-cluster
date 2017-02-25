@@ -353,6 +353,7 @@ cp -R ../make-certs ../openssl.cnf ../kubeconfig.yaml manifests systemd tmp/
 export K8S_VERSION=1.5.3
 export K8S_POD_SUBNET=10.244.0.0/16
 export K8S_NODE_POD_SUBNET=10.244.2.0/24
+export K8S_DNS_SERVICE_IP=10.100.0.10
 export K8S_DNS_DOMAIN=cluster.local
 export MASTER_IP=10.142.0.2
 export LOCAL_IP=10.142.0.3
