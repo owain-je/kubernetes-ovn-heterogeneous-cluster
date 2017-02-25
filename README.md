@@ -132,6 +132,7 @@ rm -rf tmp
 mkdir tmp
 cp -R make-certs openssl.cnf kubedns-* manifests systemd tmp/
 
+export HOSTNAME=`hostname`
 export K8S_VERSION=1.5.3
 export K8S_POD_SUBNET=10.244.0.0/16
 export K8S_NODE_POD_SUBNET=10.244.1.0/24
@@ -142,7 +143,9 @@ export K8S_DNS_SERVICE_IP=10.100.0.10
 export K8S_DNS_DOMAIN=cluster.local
 export ETCD_VERSION=3.1.1
 export MASTER_IP=10.142.0.2
-export HOSTNAME=`hostname`
+
+# The following is needed for now, because OVS can't route from pod network to node.
+export MASTER_INTERNAL_IP=10.244.1.2
 
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/manifests/*.yaml
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/systemd/kubelet.service
@@ -350,6 +353,7 @@ rm -rf tmp
 mkdir tmp
 cp -R ../make-certs ../openssl.cnf ../kubeconfig.yaml manifests systemd tmp/
 
+export HOSTNAME=`hostname`
 export K8S_VERSION=1.5.3
 export K8S_POD_SUBNET=10.244.0.0/16
 export K8S_NODE_POD_SUBNET=10.244.2.0/24
@@ -357,7 +361,6 @@ export K8S_DNS_SERVICE_IP=10.100.0.10
 export K8S_DNS_DOMAIN=cluster.local
 export MASTER_IP=10.142.0.2
 export LOCAL_IP=10.142.0.3
-export HOSTNAME=`hostname`
 
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/manifests/proxy.yaml
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/systemd/kubelet.service
