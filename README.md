@@ -48,7 +48,7 @@ gcloud compute instances create "sig-windows-master" \
     --subnet "default" \
     --can-ip-forward \
     --maintenance-policy "MIGRATE" \
-    --tags "http-server","https-server" \
+    --tags "https-server" \
     --image "ubuntu-1604-xenial-v20170125" \
     --image-project "ubuntu-os-cloud" \
     --boot-disk-size "50" \
@@ -70,7 +70,9 @@ echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > sudo tee /etc
 
 apt-get update
 apt-get install -y docker.io dkms
+```
 
+```sh
 cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
@@ -99,8 +101,6 @@ SSH again into the machine and let's proceed.
 
 Create the OVS bridge interface:
 ```sh
-ovs-vsctl add-br br-int
-
 export TUNNEL_MODE=geneve
 export LOCAL_IP=10.142.0.2
 export MASTER_IP=10.142.0.2
@@ -224,6 +224,8 @@ systemctl enable ovn-k8s-watcher
 systemctl start ovn-k8s-watcher
 ```
 
+**TODO** **must** add hwaddress to /etc/network/interfaces.
+
 And deploy Kubernetes DNS:
 ```sh
 cd ~/kubernetes-ovn-heterogeneous-cluster/master
@@ -284,7 +286,9 @@ echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > sudo tee /etc
 
 apt-get update
 apt-get install -y docker.io dkms
+```
 
+```sh
 cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
@@ -313,8 +317,6 @@ SSH again into the machine and let's proceed.
 
 Create the OVS bridge interface:
 ```sh
-ovs-vsctl add-br br-int
-
 export TUNNEL_MODE=geneve
 export LOCAL_IP=10.142.0.3
 export MASTER_IP=10.142.0.2
@@ -388,16 +390,19 @@ cp tmp/kubeconfig.yaml /etc/kubernetes/
 
 cp -R tmp/systemd/*.service /etc/systemd/system/
 systemctl daemon-reload
-```
 
-One will need `kubectl` as well:
-```sh
 curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v$K8S_VERSION/bin/linux/amd64/kubectl
 chmod +x /usr/bin/kubectl
+
+kubectl config set-cluster default-cluster --server=https://$MASTER_IP --certificate-authority=/etc/kubernetes/tls/ca.pem
+kubectl config set-credentials default-admin --certificate-authority=/etc/kubernetes/tls/ca.pem --client-key=/etc/kubernetes/tls/node-key.pem --client-certificate=/etc/kubernetes/tls/node.pem
+kubectl config set-context local --cluster=default-cluster --user=default-admin
+kubectl config use-context local
  ```
 
+Now, let's configure pod networking for this node:
 ```sh
-export TOKEN=$(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml describe secret $(kubectl --kubeconfig=/etc/kubernetes/kubeconfig.yaml get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
+export TOKEN=$(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
 
 ovs-vsctl set Open_vSwitch . \
   external_ids:k8s-api-server="https://$MASTER_IP" \
@@ -426,15 +431,12 @@ ovn-k8s-overlay minion-init \
   --node-name="$HOSTNAME"
 ```
 
+**TODO** **must** add hwaddress to /etc/network/interfaces.
+
 By this time, your Linux worker node is ready to run Kubernete workloads:
 ```sh
 systemctl enable kubelet
 systemctl start kubelet
-
-kubectl config set-cluster default-cluster --server=https://$MASTER_IP --certificate-authority=/etc/kubernetes/tls/ca.pem
-kubectl config set-credentials default-admin --certificate-authority=/etc/kubernetes/tls/ca.pem --client-key=/etc/kubernetes/tls/node-key.pem --client-certificate=/etc/kubernetes/tls/node.pem
-kubectl config set-context local --cluster=default-cluster --user=default-admin
-kubectl config use-context local
 ```
 
 Let's proceed to setup the Windows worker node.
@@ -527,6 +529,7 @@ Look in [ovn-kubernetes issues](https://github.com/openvswitch/ovn-kubernetes/is
 * https://github.com/openvswitch/ovn-kubernetes/issues/79
 * https://github.com/openvswitch/ovn-kubernetes/issues/80
 * https://github.com/openvswitch/ovn-kubernetes/issues/82
+* https://github.com/openvswitch/ovn-kubernetes/issues/85
 
 ## (Optional) Build packages
 
