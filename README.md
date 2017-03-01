@@ -219,7 +219,6 @@ cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
 
-# Before proceeding: https://github.com/openvswitch/ovn-kubernetes/pull/86
 
 pip install --upgrade --prefix=/usr/local --ignore-installed .
 
@@ -434,7 +433,6 @@ cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
 
-# Before proceeding: https://github.com/openvswitch/ovn-kubernetes/pull/86
 
 pip install --upgrade --prefix=/usr/local --ignore-installed .
 
