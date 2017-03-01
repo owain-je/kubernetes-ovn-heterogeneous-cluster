@@ -219,7 +219,6 @@ cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
 
-
 pip install --upgrade --prefix=/usr/local --ignore-installed .
 
 ovn-k8s-overlay master-init \
@@ -230,8 +229,6 @@ ovn-k8s-overlay master-init \
 systemctl enable ovn-k8s-watcher
 systemctl start ovn-k8s-watcher
 ```
-
-**TODO** **must** add hwaddress to /etc/network/interfaces.
 
 And deploy Kubernetes DNS:
 ```sh
@@ -433,7 +430,6 @@ cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
 
-
 pip install --upgrade --prefix=/usr/local --ignore-installed .
 
 ovn-k8s-overlay minion-init \
@@ -441,8 +437,6 @@ ovn-k8s-overlay minion-init \
   --minion-switch-subnet="$K8S_NODE_POD_SUBNET" \
   --node-name="$HOSTNAME"
 ```
-
-**TODO** **must** add hwaddress to /etc/network/interfaces.
 
 By this time, your Linux worker node is ready to run Kubernetes workloads:
 ```sh
