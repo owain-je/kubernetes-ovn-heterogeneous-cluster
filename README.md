@@ -96,6 +96,11 @@ reboot
 
 SSH again into the machine and let's proceed.
 
+**ATTENTION**:
+* From now on, it's assumed you're logged-in as `root`.
+* Pay attention to the environment variables below, particularly:
+  * `LOCAL_IP` must be the public IP of this node
+
 Create the OVS bridge interface:
 ```sh
 export TUNNEL_MODE=geneve
@@ -119,9 +124,12 @@ We are now ready to set-up Kubernetes master node.
 
 ### Kubernetes set-up
 
-**ATTENTION**: From now on, it's assumed you're logged-in as `root`.
+**ATTENTION**:
+* From now on, it's assumed you're logged-in as `root`.
+* Pay attention to the environment variables below, particularly:
+  * `MASTER_INTERNAL_IP` must be an IP within `K8S_NODE_POD_SUBNET` subnet
+  * `K8S_DNS_SERVICE_IP` must be an IP within `K8S_SERVICE_SUBNET` subnet
 
-First, we need to run `etcd`, the store used by Kubernetes. The following is a one-time step only:
 ```sh
 cd ~/kubernetes-ovn-heterogeneous-cluster/master
 
@@ -139,7 +147,6 @@ export K8S_DNS_VERSION=1.13.0
 export K8S_DNS_SERVICE_IP=10.100.0.10
 export K8S_DNS_DOMAIN=cluster.local
 export ETCD_VERSION=3.1.1
-export MASTER_IP=10.142.0.2
 
 # The following is needed for now, because OVS can't route from pod network to node.
 export MASTER_INTERNAL_IP=10.244.1.2
@@ -245,11 +252,11 @@ kubectl -n kube-system get pods
 You should see something like:
 ```
 NAME                                 READY     STATUS    RESTARTS   AGE
-kube-apiserver-10.138.0.2            1/1       Running   0          9m
-kube-controller-manager-10.138.0.2   1/1       Running   0          9m
+kube-apiserver-10.142.0.2            1/1       Running   0          9m
+kube-controller-manager-10.142.0.2   1/1       Running   0          9m
 kube-dns-555682531-5pp48             0/3       Pending   0          1m
-kube-proxy-10.138.0.2                1/1       Running   0          9m
-kube-scheduler-10.138.0.2            1/1       Running   0          9m
+kube-proxy-10.142.0.2                1/1       Running   0          9m
+kube-scheduler-10.142.0.2            1/1       Running   0          9m
 ```
 
 Let's proceed to set-up the worker nodes.
@@ -313,6 +320,12 @@ reboot
 
 SSH again into the machine, become root and let's proceed.
 
+**ATTENTION**:
+* From now on, it's assumed you're logged-in as `root`.
+* Pay attention to the environment variables below, particularly:
+  * `LOCAL_IP` must be the public IP of this node
+  * `MASTER_IP` must be the remote public IP address of the master node
+
 Create the OVS bridge interface:
 ```sh
 export TUNNEL_MODE=geneve
@@ -336,11 +349,13 @@ We are now ready to set-up Kubernetes Linux worker node.
 
 ### Kubernetes set-up
 
-**Attention**: You **must** copy the CA keypair that's available in the master node over the following paths:
-* /etc/kubernetes/tls/ca.pem
-* /etc/kubernetes/tls/ca-key.pem
+**Attention**:
+* From now on, it's assumed you're logged-in as `root`.
+* You **must** copy the CA keypair that's available in the master node over the following paths:
+  * /etc/kubernetes/tls/ca.pem
+  * /etc/kubernetes/tls/ca-key.pem
+* Pay attention to the environment variables below/
 
-When it's done, proceed with the following:
 ```sh
 cd ~/kubernetes-ovn-heterogeneous-cluster/worker/linux
 
@@ -354,8 +369,6 @@ export K8S_POD_SUBNET=10.244.0.0/16
 export K8S_NODE_POD_SUBNET=10.244.2.0/24
 export K8S_DNS_SERVICE_IP=10.100.0.10
 export K8S_DNS_DOMAIN=cluster.local
-export MASTER_IP=10.142.0.2
-export LOCAL_IP=10.142.0.3
 
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/manifests/proxy.yaml
 sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/systemd/kubelet.service
