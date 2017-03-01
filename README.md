@@ -19,7 +19,6 @@ Many thanks to the great people that helped achieve this, namely:
 The following items are to be implemented and are not sorted by importance!
 
 * Copy CA files from master.
-* `etcd` container should use a host path for storing data, in order to survive restarts.
 * Add other cloud providers documentation, e.g. AWS.
 * Add gateway node instructions for enabling pod containers Internet access.
 * Setup OVS TLS.
