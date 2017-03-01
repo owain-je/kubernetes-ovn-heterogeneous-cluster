@@ -1,5 +1,5 @@
 [Unit]
-Description=Kubernetes Kubelet
+Description=Kubernetes kubelet
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 [Service]
 ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests

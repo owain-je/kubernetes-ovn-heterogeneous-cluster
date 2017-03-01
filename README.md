@@ -482,7 +482,7 @@ cmd /c 'msiexec /i OpenvSwitch_prerelease.msi /qn'
 netsh netkvm setparam 0 *RscIPv4 0
 netsh netkvm restart 0
 
-# You will need to reconnect your RDP session after restarting the netkvm
+# You may need to reconnect your RDP session after restarting the netkvm
 # driver.
 
 Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
