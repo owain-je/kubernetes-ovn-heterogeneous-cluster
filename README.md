@@ -533,14 +533,16 @@ New-VMSwitch -Name KubeProxySwitch -SwitchType Internal
 
 cd C:\kubernetes
 $env:INTERFACE_TO_ADD_SERVICE_IP = "KubeProxySwitch"
-.\kube-proxy.exe -v=3 --proxy-mode=userspace --hostname-override=sig-windows-worker-windows-1 --bind-address=10.142.0.5 --master=http://10.142.0.2:8080 --cluster-cidr=10.244.0.0/16
+$env:HOSTNAME = hostname
+.\kube-proxy.exe -v=3 --proxy-mode=userspace --hostname-override=$env:HOSTNAME --bind-address=10.142.0.5 --master=http://10.142.0.2:8080 --cluster-cidr=10.244.0.0/16
 ```
 
 And the `kubelet`:
 ```sh
 cd C:\kubernetes
 $env:CONTAINER_NETWORK = "external"
-.\kubelet.exe -v=3 --address=10.142.0.9 --hostname-override=10.142.0.9 --cluster_dns=10.100.0.10 --cluster_domain=cluster.local --pod-infra-container-image="apprenda/pause" --resolv-conf="" --api_servers=http://10.142.0.2:8080
+$env:HOSTNAME = hostname
+.\kubelet.exe -v=3 --address=10.142.0.9 --hostname-override=$env:HOSTNAME --cluster_dns=10.100.0.10 --cluster_domain=cluster.local --pod-infra-container-image="apprenda/pause" --resolv-conf="" --api_servers=http://10.142.0.2:8080
 ```
 
 If everything is working, you should see all three nodes and several pods in the output of these kubectl commands:
