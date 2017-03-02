@@ -201,7 +201,13 @@ kubectl config set-context local --cluster=default-cluster --user=default-admin
 kubectl config use-context local
 ```
 
-Now, let's configure pod networking for this node:
+**Attention**: the API server will take a minute or more to come up, depending on the CPUs available and networking speed. So, before proceeding make sure the API server came up. Run `kubectl get nodes` until you see something like:
+```
+NAME           STATUS                     AGE
+pires-master   Ready,SchedulingDisabled   7s
+```
+
+After making sure the API server is up & running, you need to configure pod networking for this node:
 ```sh
 export TOKEN=$(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
 
