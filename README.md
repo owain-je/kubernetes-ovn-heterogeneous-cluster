@@ -459,6 +459,10 @@ Let's proceed to setup the Windows worker node.
 
 ## Worker (Windows)
 
+**Attention**:
+* Connectivity may flicker and you may need to reconnect your RDP session. This is expected at least a couple times when setting up networking interfaces.
+* Make sure Windows Server 2016 Routing feature is installed. You can find information on how to do it [here](http://protechgurus.com/configure-lan-routing-windows-server-2016/) and if you're following said instructions **make sure** you just install the feature as there's no need, nor have we tried, enabling LAN Routing, etc.
+
 For the sake of simplicity when setting up Windows node, we will not be relying on TLS for now.
 
 ### Node set-up
@@ -491,9 +495,6 @@ cmd /c 'msiexec /i OpenvSwitch_prerelease.msi /qn'
 netsh netkvm setparam 0 *RscIPv4 0
 netsh netkvm restart 0
 
-# You may need to reconnect your RDP session after restarting the netkvm
-# driver.
-
 Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
 Install-Package -Name docker -ProviderName DockerMsftProvider
 ```
@@ -505,7 +506,7 @@ Restart-Computer -Force
 
 Re-establish connection to the VM.
 
-Now, one needs to set-up the overlay (OVN) network. On a per node basis, copy `worker/windows/install_ovn.ps1` over to `C:\ovs` on the Windows node and edit its contents accordingly before running the Powershell script.
+Now, one needs to set-up the overlay (OVN) network. On a per node basis, copy `worker/windows/install_ovn.ps1` over to `C:\ovs` on the Windows node and **edit its contents accordingly before running the Powershell script**.
 
 Then, start a new Powershell session with administrator privileges and execute:
 ```sh
@@ -517,7 +518,7 @@ We are now ready to set-up Kubernetes Windows worker node.
 
 ### Kubernetes set-up
 
-On a per node basis, copy `worker/windows/install_k8s.ps1` over to the Windows node and edit its contents accordingly before running the Powershell script.
+On a per node basis, copy `worker/windows/install_k8s.ps1` over to the Windows node and **edit its contents accordingly before running the Powershell script**.
 
 Now, let's install Kubernetes:
 ```sh
