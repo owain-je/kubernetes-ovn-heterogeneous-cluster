@@ -160,6 +160,7 @@ sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/openssl.cnf
 
 sed -i"*" "s|__MASTER_INTERNAL_IP__|$MASTER_INTERNAL_IP|g" tmp/manifests/*.yaml
+
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/manifests/proxy.yaml
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/systemd/kubelet.service
 sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
@@ -219,6 +220,7 @@ ovs-vsctl set Open_vSwitch . \
 ln -fs /etc/kubernetes/tls/ca.pem /etc/openvswitch/k8s-ca.crt
 
 apt install -y python-pip
+
 pip install --upgrade pip
 
 cd ~
@@ -356,7 +358,7 @@ We are now ready to set-up Kubernetes Linux worker node.
 * You **must** copy the CA keypair that's available in the master node over the following paths:
   * /etc/kubernetes/tls/ca.pem
   * /etc/kubernetes/tls/ca-key.pem
-* Pay attention to the environment variables below/
+* Pay attention to the environment variables below
 
 ```sh
 cd ~/kubernetes-ovn-heterogeneous-cluster/worker/linux
@@ -430,6 +432,7 @@ tar zxf cni.tar.gz
 rm -f cni.tar.gz
 
 apt install -y python-pip
+
 pip install --upgrade pip
 
 cd ~
