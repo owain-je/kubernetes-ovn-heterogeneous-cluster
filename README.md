@@ -13,6 +13,7 @@ Many thanks to the great people that helped achieve this, namely:
 * Feng Min (Google)
 * Peter Hornyack (Google)
 * The authors of https://github.com/openvswitch/ovn-kubernetes
+* Kubernetes SIG-Windows
 
 ## TODO
 
@@ -515,7 +516,6 @@ Start-BitsTransfer https://raw.githubusercontent.com/apprenda/kubernetes-ovn-het
 Now, **edit the contents of install_ovn.ps1 accordingly before running the Powershell script**.
 Then, start a new Powershell session with administrator privileges and execute:
 ```sh
-cd C:\ovs
 .\install_ovn.ps1
 ```
 
