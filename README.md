@@ -543,7 +543,9 @@ New-VMSwitch -Name KubeProxySwitch -SwitchType Internal
 cd C:\kubernetes
 $env:INTERFACE_TO_ADD_SERVICE_IP = "KubeProxySwitch"
 $env:HOSTNAME = hostname
-.\kube-proxy.exe -v=3 --proxy-mode=userspace --hostname-override=$env:HOSTNAME --bind-address=10.142.0.5 --master=http://10.142.0.2:8080 --cluster-cidr=10.244.0.0/16
+$env:MASTER_IP = "10.142.0.2"
+$env:K8S_POD_SUBNET = "10.244.0.0/16"
+.\kube-proxy.exe -v=3 --proxy-mode=userspace --hostname-override=$env:HOSTNAME --master=http://"$env:MASTER_IP":8080 --cluster-cidr=$env:K8S_POD_SUBNET
 ```
 
 And the `kubelet`:
@@ -551,7 +553,11 @@ And the `kubelet`:
 cd C:\kubernetes
 $env:CONTAINER_NETWORK = "external"
 $env:HOSTNAME = hostname
-.\kubelet.exe -v=3 --address=10.142.0.9 --hostname-override=$env:HOSTNAME --cluster_dns=10.100.0.10 --cluster_domain=cluster.local --pod-infra-container-image="apprenda/pause" --resolv-conf="" --api_servers=http://10.142.0.2:8080
+$env:MASTER_IP = 10.142.0.2
+$env:K8S_POD_SUBNET = 10.244.0.0/16
+$env:K8S_DNS_SERVICE_IP = 10.100.0.10
+$env:K8S_DNS_DOMAIN = "cluster.local"
+.\kubelet.exe -v=3 --hostname-override=$env:HOSTNAME --cluster_dns=$env:K8S_DNS_SERVICE_IP --cluster_domain=$env:K8S_DNS_DOMAIN --pod-infra-container-image="apprenda/pause" --resolv-conf="" --api_servers=http://$env:MASTER_IP:8080
 ```
 
 If everything is working, you should see all three nodes and several pods in the output of these kubectl commands:
