@@ -40,7 +40,6 @@ start-service ovn-controller
 
 # On some cloud-providers this is needed, otherwise RDP connection may bork
 netsh interface ipv4 set subinterface "HNSTransparent" mtu=1430 store=persistent
-netsh interface ipv4 set subinterface "k8s-sig-windows" mtu=1430 store=persistent
 
 #expand k8s PoC binaries and create service
 Expand-Archive -Force -Path "$($K8S_ZIP)" -DestinationPath "$($OVS_PATH)"
