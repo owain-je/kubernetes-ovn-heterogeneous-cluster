@@ -535,18 +535,6 @@ Then, start a new Powershell session with administrator privileges to install Ku
 
 **Attention**: While we don't automate Kubernetes components registration as Windows services, one will need to edit the commands below according to the specifics of the cluster in the making.
 
-Run `kube-proxy`:
-```sh
-New-VMSwitch -Name KubeProxySwitch -SwitchType Internal
-
-cd C:\kubernetes
-$env:INTERFACE_TO_ADD_SERVICE_IP = "KubeProxySwitch"
-$env:HOSTNAME = hostname
-$env:MASTER_IP = "10.142.0.2"
-$env:K8S_POD_SUBNET = "10.244.0.0/16"
-.\kube-proxy.exe -v=3 --proxy-mode=userspace --hostname-override=$env:HOSTNAME --master=http://"$env:MASTER_IP":8080 --cluster-cidr=$env:K8S_POD_SUBNET
-```
-
 And the `kubelet`:
 ```sh
 cd C:\kubernetes
