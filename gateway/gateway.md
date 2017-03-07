@@ -1,4 +1,12 @@
-**ATTENTION**: From now on, it's assumed you're logged-in as `root`.
+**ATTENTION**:
+* From now on, it's assumed you're logged-in as `root`.
+* You **must** copy the CA keypair that's available in the master node over the following paths:
+  * /etc/kubernetes/tls/ca.pem
+  * /etc/kubernetes/tls/ca-key.pem
+* Pay attention to the environment variables below, particularly:
+  * `LOCAL_IP` must be the public IP of this node
+  * `MASTER_IP` must be the remote public IP address of the master node
+  * `GW_IP` must be the cloud provider default gateway IP address
 
 Let's install OVS/OVN:
 ```sh
@@ -75,6 +83,8 @@ cd ..
 
 cp tmp/kubeconfig.yaml /etc/kubernetes/
 
+cp tmp/systemd/ovn-k8s-gateway-helper.service /etc/systemd/system/
+
 curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v$K8S_VERSION/bin/linux/amd64/kubectl
 chmod +x /usr/bin/kubectl
 
@@ -93,11 +103,11 @@ ln -fs /etc/kubernetes/tls/ca.pem /etc/openvswitch/k8s-ca.crt
 
 apt-get install -y python-pip
 
+pip install --upgrade pip
+
 cd ~
 git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
-
-# Before proceeding: https://github.com/openvswitch/ovn-kubernetes/pull/86
 
 pip install --upgrade --prefix=/usr/local --ignore-installed .
 
