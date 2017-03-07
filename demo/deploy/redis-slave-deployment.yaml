@@ -6,7 +6,7 @@ metadata:
     app: redis
     role: slave
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
