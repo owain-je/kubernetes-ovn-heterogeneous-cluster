@@ -6,21 +6,15 @@ This document describes, step-by-step, how to provision a Kubernetes cluster com
 * One Linux machine acting as Kubernetes master node and OVN central database.
 * One Linux machine acting as Kubernetes worker node.
 * One Windows machine acting as Kubernetes worker node.
+* One Linux machine acting as gateway node.
 
-Many thanks to the great people that helped achieve this, namely:
+**Many thanks to the great people that helped achieve this**, namely:
 * Alin Serdean (Cloudbase Solutions)
 * Alin Balutoiu (Cloudbase Solutions)
 * Feng Min (Google)
 * Peter Hornyack (Google)
 * The authors of https://github.com/openvswitch/ovn-kubernetes
-* Kubernetes SIG-Windows
-
-## TODO
-
-* Copy CA files from master.
-* Setup OVS TLS.
-* Add Windows node TLS support.
-* Add other cloud providers documentation, e.g. AWS.
+* [Kubernetes SIG-Windows](https://github.com/kubernetes/community/tree/master/sig-windows)
 
 ## Requirements
 
@@ -43,6 +37,13 @@ Having that said, here are the requirements:
 
 Some pending issues:
 * [Load-Balancer service type is not supported in ovn-kubernetes](https://github.com/openvswitch/ovn-kubernetes/issues/79)
+
+## TODO
+
+* Automate copying CA certificate and key files from master node to all the other nodes.
+* Adopt OVS TLS usage.
+* Add kubelet TLS support on Windows worker node.
+* Add other documenation for other cloud providers documentation, e.g. AWS.
 
 ## (Optional) Build packages
 

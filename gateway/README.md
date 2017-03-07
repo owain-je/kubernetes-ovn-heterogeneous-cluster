@@ -1,5 +1,24 @@
 # Gateway node
 
+## Node set-up
+
+Let's provision the master VM:
+```sh
+gcloud compute instances create "sig-windows-gw" \
+    --zone "us-east1-d" \
+    --machine-type "custom-2-2048" \
+    --can-ip-forward \
+    --image "ubuntu-1604-xenial-v20170125" \
+    --image-project "ubuntu-os-cloud" \
+    --boot-disk-size "50" \
+    --boot-disk-type "pd-ssd" \
+```
+
+When it's ready, SSH into it:
+```sh
+gcloud compute ssh --zone "us-east1-d" "sig-windows-gw"
+```
+
 **ATTENTION**:
 * From now on, it's assumed you're logged-in as `root`.
 * You **must** copy the CA keypair that's available in the master node over the following paths:

@@ -1,8 +1,6 @@
 # Master node
 
-## Master (Linux)
-
-### Node set-up
+## Node set-up
 
 Let's provision the master VM:
 ```sh
@@ -86,7 +84,7 @@ You should see something like:
 
 We are now ready to set-up Kubernetes master node.
 
-### Kubernetes set-up
+## Kubernetes set-up
 
 **ATTENTION**:
 * From now on, it's assumed you're logged-in as `root`.
