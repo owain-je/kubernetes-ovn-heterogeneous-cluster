@@ -44,11 +44,8 @@ Having that said, here are the requirements:
 
 ## Troubleshooting
 
-Look in [ovn-kubernetes issues](https://github.com/openvswitch/ovn-kubernetes/issues) first. Some problems we found are:
-* https://github.com/openvswitch/ovn-kubernetes/issues/79
-* https://github.com/openvswitch/ovn-kubernetes/issues/80
-* https://github.com/openvswitch/ovn-kubernetes/issues/82
-* https://github.com/openvswitch/ovn-kubernetes/issues/85
+Some pending issues:
+* [Load-Balancer service type is not supported in ovn-kubernetes](https://github.com/openvswitch/ovn-kubernetes/issues/79)
 
 ## (Optional) Build packages
 
