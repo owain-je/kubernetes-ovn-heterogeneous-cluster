@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: guestbook
+  labels:
+    app: guestbook
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: guestbook
+    spec:
+      containers:
+      - name: guestbook
+        image: guestbook:v0.3-nanoserver
+        ports:
+        - name: http-server
+          containerPort: 3000
+          protocol: TCP
+      nodeSelector:
+        beta.kubernetes.io/os: windows

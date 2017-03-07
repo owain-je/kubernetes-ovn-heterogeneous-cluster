@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis-master
+  labels:
+    app: redis
+    role: master
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: master
+    spec:
+      containers:
+      - name: redis-master
+        image: redis:3.0-nanoserver
+        ports:
+        - name: redis-server
+          containerPort: 6379
+          protocol: TCP
+      nodeSelector:
+        beta.kubernetes.io/os: windows

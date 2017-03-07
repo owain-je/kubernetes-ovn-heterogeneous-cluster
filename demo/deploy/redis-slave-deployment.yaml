@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis-slave
+  labels:
+    app: redis
+    role: slave
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: slave
+    spec:
+      containers:
+      - name: redis-slave
+        image: redis-slave:3.0-nanoserver
+        ports:
+        - name: redis-server
+          containerPort: 6379
+          protocol: TCP
+      nodeSelector:
+        beta.kubernetes.io/os: windows
