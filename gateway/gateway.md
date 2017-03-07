@@ -116,7 +116,7 @@ ovn-k8s-util nics-to-bridge $NIC && dhclient br$NIC
 ovn-k8s-overlay gateway-init \
   --cluster-ip-subnet "$K8S_POD_SUBNET" \
   --bridge-interface "br$NIC" \
-  --physical-ip "$LOCAL_IP" \
+  --physical-ip "$LOCAL_IP/20" \
   --node-name "$HOSTNAME" \
   --default-gw "$GW_IP"
 
