@@ -2,6 +2,8 @@
 
 ## Build images
 
+Since we are not caching the Windows Containers images to be used for this demo, you'll need to build them on every Windows node, as follows:
+
 ### redis-master
 
 There is no need to build an image since the official `redis:3.0-nanoserver` will be used.
@@ -17,10 +19,12 @@ docker build -t redis-slave:3.0-nanoserver .
 
 ```
 cd docker/guestbook
-docker build -t guestbook:0.3-nanoserver .
+docker build -t guestbook:v0.3-nanoserver .
 ```
 
 ## Deploy
+
+Deployment may happen anywhere for as long as there's access to the Kubernetes API, as follows:
 
 ```
 cd deploy
