@@ -1,5 +1,5 @@
 $K8S_PATH="C:\kubernetes"
-$K8S_VERSION="1.6.0-beta.1"
+$K8S_VERSION="1.5.3"
 
 mkdir $K8S_PATH
 cd $K8S_PATH
