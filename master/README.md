@@ -228,4 +228,4 @@ kube-proxy-10.142.0.2                1/1       Running   0          9m
 kube-scheduler-10.142.0.2            1/1       Running   0          9m
 ```
 
-[**Go back**](../README.md).
+[**Go back**](../README.md#cluster-deployment).

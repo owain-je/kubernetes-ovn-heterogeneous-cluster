@@ -127,4 +127,4 @@ systemctl enable ovn-k8s-gateway-helper.service
 systemctl start ovn-k8s-gateway-helper.service
 ```
 
-[**Go back**](../README.md).
+[**Go back**](../README.md#cluster-deployment).

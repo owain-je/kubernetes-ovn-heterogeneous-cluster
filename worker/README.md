@@ -274,4 +274,4 @@ cd C:\kubernetes
 .\kubectl.exe -s 10.142.0.2:8080 -n kube-system get pods
 ```
 
-[**Go back**](../README.md).
+[**Go back**](../README.md#cluster-deployment).
