@@ -270,7 +270,7 @@ Then, start a new Powershell session with administrator privileges to install Ku
 Before you run the kubelet, **edit the flag values below according to your environment**:
 ```sh
 $env:CONTAINER_NETWORK = "external"
-.\kubelet.exe -v=3 --hostname-override sig-windows-worker-windows --cluster_dns 10.100.0.10 --cluster_domain cluster.local --pod-infra-container-image="apprenda/pause" --resolv-conf "" --api_servers "http://10.142.0.2:8080"
+.\kubelet.exe -v=3 --hostname-override=sig-windows-worker-windows --cluster_dns=10.100.0.10 --cluster_domain=cluster.local --pod-infra-container-image="apprenda/pause" --resolv-conf="" --api_servers="http://10.142.0.2:8080"
 ```
 
 If everything is working, you should see all three nodes and several pods in the output of these kubectl commands:
