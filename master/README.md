@@ -189,7 +189,7 @@ apt install -y python-pip
 pip install --upgrade pip
 
 cd ~
-git clone https://github.com/openvswitch/ovn-kubernetes
+git clone https://github.com/alinbalutoiu/ovn_alpha ovn-kubernetes
 cd ovn-kubernetes
 
 pip install --upgrade --prefix=/usr/local --ignore-installed .
