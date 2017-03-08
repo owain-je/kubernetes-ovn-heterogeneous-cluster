@@ -100,7 +100,7 @@ cd ~/kubernetes-ovn-heterogeneous-cluster/worker/linux
 
 rm -rf tmp
 mkdir tmp
-cp -R ../make-certs ../openssl.cnf ../kubeconfig.yaml ../../master/manifests systemd tmp/
+cp -R ../make-certs ../openssl.cnf ../kubeconfig.yaml systemd tmp/
 
 export HOSTNAME=`hostname`
 export K8S_VERSION=1.5.3
@@ -129,7 +129,7 @@ chmod +x make-certs
 ./make-certs
 cd ..
 
-cp -R tmp/manifests /etc/kubernetes/
+mkdir -p /etc/kubernetes/
 
 cp tmp/kubeconfig.yaml /etc/kubernetes/
 
