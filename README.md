@@ -43,13 +43,6 @@ Follow these steps to deploy your cluster:
 Some pending issues:
 * [Load-Balancer service type is not supported in ovn-kubernetes](https://github.com/openvswitch/ovn-kubernetes/issues/79)
 
-## TODO
-
-* Automate copying CA certificate and key files from master node to all the other nodes.
-* Adopt OVS TLS usage.
-* Add kubelet TLS support on Windows worker node.
-* Add other documenation for other cloud providers documentation, e.g. AWS.
-
 ## (Optional) Build packages
 
 ### OVS/OVN
