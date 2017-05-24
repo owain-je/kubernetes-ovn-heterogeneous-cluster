@@ -18,7 +18,7 @@ pem_admin_key=$cert_dir/admin-key.pem
 pem_admin_csr=$cert_dir/admin-csr.pem
 
 # Make sure cert group exists
-groupadd -r $cert_group
+[ $(getent group $cert_group) ] || groupadd -r $cert_group
 
 # Generate TLS artifacts
 mkdir -p "$cert_dir"
