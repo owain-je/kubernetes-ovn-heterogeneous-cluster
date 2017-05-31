@@ -97,6 +97,8 @@ sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
 
 sed -i"*" "s|__NIC__|$NIC|g" tmp/systemd/ovn-k8s-gateway-helper.service
 
+sed -i"*" "s|__NIC__|$NIC|g" tmp/systemd/gateway-network-startup.service
+
 cd tmp
 chmod +x make-certs
 ./make-certs
@@ -105,6 +107,10 @@ cd ..
 cp tmp/kubeconfig.yaml /etc/kubernetes/
 
 cp tmp/systemd/ovn-k8s-gateway-helper.service /etc/systemd/system/
+cp tmp/systemd/gateway-network-startup.service /etc/systemd/system/
+
+cp check-ovn-k8s-network.sh /usr/bin/
+chmod +x /usr/bin/check-ovn-k8s-network.sh
 
 curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v$K8S_VERSION/bin/linux/amd64/kubectl
 chmod +x /usr/bin/kubectl
@@ -145,6 +151,7 @@ ovn-k8s-overlay gateway-init \
 
 systemctl daemon-reload
 systemctl enable ovn-k8s-gateway-helper.service
+systemctl enable gateway-network-startup.service
 systemctl start ovn-k8s-gateway-helper.service
 ```
 
