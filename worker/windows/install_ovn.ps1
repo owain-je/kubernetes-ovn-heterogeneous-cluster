@@ -44,12 +44,9 @@ Start-BitsTransfer http://www.7-zip.org/a/7z1604-x64.exe
 cmd /c '7z1604-x64.exe /S /qn'
 Remove-Item -Recurse -Force 7z1604-x64.exe
 
-
+#expand k8s PoC binaries and create service
 $unzipCmd = '"C:\Program Files\7-Zip\7z.exe" e -aos "{0}" -o"{1}" -x!*libeay32.dll -x!*ssleay32.dll'  -f $K8S_ZIP, $OVS_PATH
 cmd /c $unzipCmd
-
-#expand k8s PoC binaries and create service
-#Expand-Archive -Force -Path "$($K8S_ZIP)" -DestinationPath "$($OVS_PATH)"
 
 cmd /c 'sc create ovn-k8s binPath= "\"c:\Program Files\Cloudbase Solutions\Open vSwitch\bin\servicewrapper.exe\" ovn-k8s \"c:\Program Files\Cloudbase Solutions\Open vSwitch\bin\k8s_ovn.exe\"" type= own start= auto error= ignore depend= ovsdb-server/ovn-controller displayname= "OVN Watcher" obj= LocalSystem'
 

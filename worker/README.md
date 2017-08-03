@@ -230,7 +230,7 @@ cd ovs
 
 Start-BitsTransfer https://cloudbase.it/downloads/openvswitch-hyperv-2.7.0-certified.msi
 Start-BitsTransfer https://cloudbase.it/downloads/k8s_ovn_service_prerelease.zip
- 
+
 netsh netkvm setparam 0 *RscIPv4 0
 netsh netkvm restart 0
 
