@@ -1,0 +1,104 @@
+#!/bin/bash
+
+date
+echo "Executing configure-node on ${HOSTNAME}"
+
+NIC=$(ip route get 4.2.2.1 |head -n1 |  cut -d" " -f5)
+GW_IP=$(ip route get 4.2.2.1 |head -n1 |  cut -d" " -f3)
+
+
+mkdir -p /etc/kubernetes/tls
+
+date
+echo "Fetching certs from ${MASTER_IP}"
+scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa sig-win@${MASTER_IP}:/etc/kubernetes/tls/ca.pem /etc/kubernetes/tls/ca.pem
+scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa sig-win@${MASTER_IP}:/etc/kubernetes/tls/ca-key.pem /etc/kubernetes/tls/ca-key.pem
+
+
+ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \
+  external_ids:ovn-nb="tcp:$MASTER_IP:6641" \
+  external_ids:ovn-encap-ip="$LOCAL_IP" \
+  external_ids:ovn-encap-type="$TUNNEL_MODE"
+
+ovs-vsctl get Open_vSwitch . external_ids
+
+cd ${ROOT_CHECKOUT_DIR}/gateway
+
+rm -rf tmp
+mkdir tmp
+cp -R ../worker/make-certs ../worker/openssl.cnf ../worker/kubeconfig.yaml systemd tmp/
+
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/openssl.cnf
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/kubeconfig.yaml
+
+sed -i"*" "s|__LOCAL_IP__|$LOCAL_IP|g" tmp/openssl.cnf
+
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
+
+sed -i"*" "s|__NIC__|$NIC|g" tmp/systemd/ovn-k8s-gateway-helper.service
+
+cd tmp
+chmod +x make-certs
+./make-certs
+cd ..
+
+cp tmp/kubeconfig.yaml /etc/kubernetes/
+
+cp tmp/systemd/ovn-k8s-gateway-helper.service /etc/systemd/system/
+
+curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v$K8S_VERSION/bin/linux/amd64/kubectl
+chmod +x /usr/bin/kubectl
+
+kubectl config set-cluster default-cluster --server=https://$MASTER_IP --certificate-authority=/etc/kubernetes/tls/ca.pem
+kubectl config set-credentials default-admin --certificate-authority=/etc/kubernetes/tls/ca.pem --client-key=/etc/kubernetes/tls/node-key.pem --client-certificate=/etc/kubernetes/tls/node.pem
+kubectl config set-context local --cluster=default-cluster --user=default-admin
+kubectl config use-context local
+
+echo "Sleeping for 30 seconds before polling for k8s api server"
+sleep 30
+
+apiIsUp="false"
+
+while [[ "${apiIsUp}" == "false" ]]; do
+
+    if kubectl get nodes | grep ${HOSTNAME} ; then
+		apiIsUp="true"
+    else
+        echo "API server not avialable yet, waiting 10 seconds and retrying"
+        sleep 10
+	fi
+
+done
+
+export TOKEN=$(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
+
+ovs-vsctl set Open_vSwitch . \
+  external_ids:k8s-api-server="https://$MASTER_IP" \
+  external_ids:k8s-api-token="$TOKEN"
+
+ln -fs /etc/kubernetes/tls/ca.pem /etc/openvswitch/k8s-ca.crt
+
+apt install -y python-pip
+
+pip install --upgrade pip
+
+cd ${ROOT_CHECKOUT_DIR}/../
+git clone https://github.com/openvswitch/ovn-kubernetes
+cd ovn-kubernetes
+
+pip install --upgrade --prefix=/usr/local --ignore-installed .
+
+# This command will print "RTNETLINK answers: Network is unreachable" and
+# "RTNETLINK answers: File exists"; these messages are expected.
+ovn-k8s-util nics-to-bridge $NIC && dhclient br$NIC
+
+ovn-k8s-overlay gateway-init \
+  --cluster-ip-subnet "$K8S_POD_SUBNET" \
+  --bridge-interface "br$NIC" \
+  --physical-ip "$LOCAL_IP/20" \
+  --node-name "$HOSTNAME" \
+  --default-gw "$GW_IP"
+
+systemctl daemon-reload
+systemctl enable ovn-k8s-gateway-helper.service
+systemctl start ovn-k8s-gateway-helper.service
