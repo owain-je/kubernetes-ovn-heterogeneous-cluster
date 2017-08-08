@@ -1,8 +1,6 @@
 $K8S_PATH="C:\kubernetes"
 $K8S_VERSION="1.7.3"
 $HOSTNAME = hostname
-#$K8S_MASTER_IP = $env:K8S_MASTER_IP
-#;Invoke-RestMethod -URI http://metadata.google.internal/computeMetadata/v1/instance/attributes/apiServer -Headers @{"Metadata-Flavor" = "Google"}
 $K8S_DNS_SERVICE_IP = "10.222.0.10"
 $K8S_DNS_DOMAIN = "cluster.local"
 

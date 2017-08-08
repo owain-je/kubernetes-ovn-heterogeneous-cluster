@@ -4,8 +4,11 @@ echo "Executing configure-node on ${HOSTNAME}"
 
 mkdir -p /etc/kubernetes/tls
 
-scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa sig-win@${MASTER_IP}:/etc/kubernetes/tls/ca.pem /etc/kubernetes/tls/ca.pem
-scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa sig-win@${MASTER_IP}:/etc/kubernetes/tls/ca-key.pem /etc/kubernetes/tls/ca-key.pem
+sudo ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa sig-win@${MASTER_IP} \
+    sudo scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa /etc/kubernetes/tls/ca.pem sig-win@${LOCAL_IP}:/etc/kubernetes/tls/ca.pem
+
+sudo ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa sig-win@${MASTER_IP} \
+    sudo scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /home/sig-win/.ssh/gce_rsa /etc/kubernetes/tls/ca-key.pem sig-win@${LOCAL_IP}:/etc/kubernetes/tls/ca-key.pem
 
 
 ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \

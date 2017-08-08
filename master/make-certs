@@ -33,7 +33,7 @@ openssl x509 -req -in $pem_server_csr -CA $pem_ca -CAkey $pem_ca_key -CAcreatese
 
 # Make server certs accessible to apiserver.
 chgrp $cert_group $pem_ca $pem_ca_key $pem_server $pem_server_key
-chmod 660 $pem_ca_key $pem_server_key
+chmod 600 $pem_ca_key $pem_server_key
 chmod 660 $pem_ca $pem_server
 
 # Generate admin
