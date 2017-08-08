@@ -37,14 +37,14 @@ cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
 
-dpkg -i openvswitch-common_2.6.2-1_amd64.deb \
-openvswitch-datapath-dkms_2.6.2-1_all.deb \
-openvswitch-switch_2.6.2-1_amd64.deb \
-ovn-common_2.6.2-1_amd64.deb \
-ovn-central_2.6.2-1_amd64.deb \
-ovn-docker_2.6.2-1_amd64.deb \
-ovn-host_2.6.2-1_amd64.deb \
-python-openvswitch_2.6.2-1_all.deb
+dpkg -i openvswitch-common_2.7.2-1_amd64.deb \
+openvswitch-datapath-dkms_2.7.2-1_all.deb \
+openvswitch-switch_2.7.2-1_amd64.deb \
+ovn-common_2.7.2-1_amd64.deb \
+ovn-central_2.7.2-1_amd64.deb \
+ovn-docker_2.7.2-1_amd64.deb \
+ovn-host_2.7.2-1_amd64.deb \
+python-openvswitch_2.7.2-1_all.deb
 ```
 
 We'll need to make sure `vport_geneve` kernel module is loaded at boot:
@@ -114,7 +114,7 @@ mkdir tmp
 cp -R ../make-certs ../openssl.cnf ../kubeconfig.yaml systemd tmp/
 
 export HOSTNAME=`hostname`
-export K8S_VERSION=1.5.3
+export K8S_VERSION=1.7.3
 export K8S_POD_SUBNET=10.244.0.0/16
 export K8S_NODE_POD_SUBNET=10.244.2.0/24
 export K8S_DNS_SERVICE_IP=10.100.0.10
@@ -176,7 +176,7 @@ apt install -y python-pip
 pip install --upgrade pip
 
 cd ~
-git clone https://github.com/alinbalutoiu/ovn_alpha ovn-kubernetes
+git clone https://github.com/openvswitch/ovn-kubernetes
 cd ovn-kubernetes
 
 pip install --upgrade --prefix=/usr/local --ignore-installed .
@@ -228,13 +228,13 @@ cd \
 mkdir ovs
 cd ovs
 
-Start-BitsTransfer https://cloudbase.it/downloads/OpenvSwitch_prerelease.msi
+Start-BitsTransfer https://cloudbase.it/downloads/openvswitch-hyperv-2.7.0-certified.msi
 Start-BitsTransfer https://cloudbase.it/downloads/k8s_ovn_service_prerelease.zip
-
-cmd /c 'msiexec /i OpenvSwitch_prerelease.msi /qn'
 
 netsh netkvm setparam 0 *RscIPv4 0
 netsh netkvm restart 0
+
+Install-WindowsFeature -Name Containers
 
 Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
 Install-Package -Name docker -ProviderName DockerMsftProvider
@@ -245,15 +245,21 @@ A reboot is mandatory:
 Restart-Computer -Force
 ```
 
-Re-establish connection to the VM.
+Re-establish connection to the VM, and install the Open vSwitch MSI:
+```
+cd c:\ovs
+cmd /c 'msiexec /i openvswitch-hyperv-2.7.0-certified.msi ADDLOCAL="OpenvSwitchCLI,OpenvSwitchDriver,OVNHost" /qn' 
+```
+
+After installation of the Open vSwitch MSI, close your powershell window, and start a new Powershell session with administrator privileges.  This is to ensure that the Open vSwitch binaries are on your $PATH.
 
 Now, one needs to set-up the overlay (OVN) network. On a per node basis, download `install_ovn.ps1` over to `C:\ovs` on the Windows node.
-```
+
+```sh
 cd c:\ovs
 Start-BitsTransfer https://raw.githubusercontent.com/apprenda/kubernetes-ovn-heterogeneous-cluster/master/worker/windows/install_ovn.ps1
 ```
 Now, **edit the contents of install_ovn.ps1 accordingly before running the Powershell script**.
-Then, start a new Powershell session with administrator privileges and execute:
 ```sh
 .\install_ovn.ps1
 ```

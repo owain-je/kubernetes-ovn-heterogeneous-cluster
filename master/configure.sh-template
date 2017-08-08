@@ -1,0 +1,125 @@
+#!/bin/bash
+
+echo "Executing configure-node on ${HOSTNAME}"
+
+cd ${ROOT_CHECKOUT_DIR}/${nodeType}
+
+pwd
+
+rm -rf tmp
+mkdir tmp
+cp -R make-certs openssl.cnf kubedns-* manifests systemd tmp/
+
+ovn-nbctl set-connection ptcp:6641
+ovn-sbctl set-connection ptcp:6642
+
+#Create the OVS bridge interface:
+ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \
+  external_ids:ovn-nb="tcp:$MASTER_IP:6641" \
+  external_ids:ovn-encap-ip="$LOCAL_IP" \
+  external_ids:ovn-encap-type="$TUNNEL_MODE"
+
+ovs-vsctl get Open_vSwitch . external_ids
+
+#Token Switch files
+
+sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/manifests/*.yaml
+sed -i"*" "s|__K8S_VERSION__|$K8S_VERSION|g" tmp/systemd/kubelet.service
+
+sed -i"*" "s|__ETCD_VERSION__|$ETCD_VERSION|g" tmp/systemd/etcd3.service
+
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/manifests/*.yaml
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__MASTER_IP__|$MASTER_IP|g" tmp/openssl.cnf
+
+sed -i"*" "s|__MASTER_INTERNAL_IP__|$MASTER_INTERNAL_IP|g" tmp/manifests/*.yaml
+
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
+sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/openssl.cnf
+
+sed -i"*" "s|__K8S_API_SERVICE_IP__|$K8S_API_SERVICE_IP|g" tmp/openssl.cnf
+
+sed -i"*" "s|__K8S_POD_SUBNET__|$K8S_POD_SUBNET|g" tmp/manifests/*.yaml
+sed -i"*" "s|__K8S_SERVICE_SUBNET__|$K8S_SERVICE_SUBNET|g" tmp/manifests/*.yaml
+
+sed -i"*" "s|__K8S_DNS_SERVICE_IP__|$K8S_DNS_SERVICE_IP|g" tmp/systemd/kubelet.service
+sed -i"*" "s|__K8S_DNS_DOMAIN__|$K8S_DNS_DOMAIN|g" tmp/systemd/kubelet.service
+
+sed -i"*" "s|__K8S_DNS_SERVICE_IP__|$K8S_DNS_SERVICE_IP|g" tmp/kubedns-service.yaml
+sed -i"*" "s|__K8S_DNS_VERSION__|$K8S_DNS_VERSION|g" tmp/kubedns-deployment.yaml
+sed -i"*" "s|__K8S_DNS_DOMAIN__|$K8S_DNS_DOMAIN|g" tmp/*.*
+
+
+cp -R tmp/systemd/*.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable etcd3
+systemctl start etcd3
+
+cd tmp
+chmod +x make-certs
+./make-certs
+cd ..
+
+mkdir -p /etc/kubernetes
+cp -R tmp/manifests /etc/kubernetes/
+
+systemctl enable kubelet
+systemctl start kubelet
+
+curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v$K8S_VERSION/bin/linux/amd64/kubectl
+chmod +x /usr/bin/kubectl
+
+kubectl config set-cluster default-cluster --server=https://$MASTER_IP --certificate-authority=/etc/kubernetes/tls/ca.pem
+kubectl config set-credentials default-admin --certificate-authority=/etc/kubernetes/tls/ca.pem --client-key=/etc/kubernetes/tls/admin-key.pem --client-certificate=/etc/kubernetes/tls/admin.pem
+kubectl config set-context local --cluster=default-cluster --user=default-admin
+kubectl config use-context local
+
+
+
+echo "Sleeping for 90 seconds before polling for k8s api server"
+sleep 90
+
+apiIsUp="false"
+
+while [[ "${apiIsUp}" == "false" ]]; do
+
+	if kubectl get secrets | grep default-token ; then
+		apiIsUp="true"
+    else
+        echo "API server not available yet, waiting 10 seconds and retrying"
+        sleep 10
+	fi
+
+done
+
+
+export TOKEN=$(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token' | cut -f2 -d':' | tr -d '\t')
+
+ovs-vsctl set Open_vSwitch . \
+  external_ids:k8s-api-server="https://$MASTER_IP" \
+  external_ids:k8s-api-token="$TOKEN"
+
+ln -fs /etc/kubernetes/tls/ca.pem /etc/openvswitch/k8s-ca.crt
+
+apt install -y python-pip
+
+pip install --upgrade pip
+
+cd ${ROOT_CHECKOUT_DIR}/../
+git clone https://github.com/openvswitch/ovn-kubernetes
+cd ovn-kubernetes
+
+pip install --upgrade --prefix=/usr/local --ignore-installed .
+
+ovn-k8s-overlay master-init \
+  --cluster-ip-subnet="$K8S_POD_SUBNET" \
+  --master-switch-subnet="$K8S_MASTER_NODE_POD_SUBNET" \
+  --node-name="$HOSTNAME"
+
+systemctl enable ovn-k8s-watcher
+systemctl start ovn-k8s-watcher
+
+cd ${ROOT_CHECKOUT_DIR}/master
+kubectl create -f tmp/kubedns-deployment.yaml
+kubectl create -f tmp/kubedns-service.yaml

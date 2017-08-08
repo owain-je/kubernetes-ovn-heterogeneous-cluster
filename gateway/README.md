@@ -43,13 +43,13 @@ cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
 
-dpkg -i openvswitch-common_2.6.2-1_amd64.deb \
-openvswitch-datapath-dkms_2.6.2-1_all.deb \
-openvswitch-switch_2.6.2-1_amd64.deb \
-ovn-common_2.6.2-1_amd64.deb \
-ovn-central_2.6.2-1_amd64.deb \
-ovn-host_2.6.2-1_amd64.deb \
-python-openvswitch_2.6.2-1_all.deb
+dpkg -i openvswitch-common_2.7.2-1_amd64.deb \
+openvswitch-datapath-dkms_2.7.2-1_all.deb \
+openvswitch-switch_2.7.2-1_amd64.deb \
+ovn-common_2.7.2-1_amd64.deb \
+ovn-central_2.7.2-1_amd64.deb \
+ovn-host_2.7.2-1_amd64.deb \
+python-openvswitch_2.7.2-1_all.deb
 ```
 
 We'll need to make sure `vport_geneve` kernel module is loaded at boot:
@@ -72,7 +72,7 @@ export LOCAL_IP=10.142.0.4
 export GW_IP=10.142.0.1
 export HOSTNAME=`hostname`
 export NIC=ens4
-export K8S_VERSION=1.5.3
+export K8S_VERSION=1.7.3
 export K8S_POD_SUBNET=10.244.0.0/16
 
 ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \
@@ -97,6 +97,8 @@ sed -i"*" "s|__HOSTNAME__|$HOSTNAME|g" tmp/make-certs
 
 sed -i"*" "s|__NIC__|$NIC|g" tmp/systemd/ovn-k8s-gateway-helper.service
 
+sed -i"*" "s|__NIC__|$NIC|g" tmp/systemd/gateway-network-startup.service
+
 cd tmp
 chmod +x make-certs
 ./make-certs
@@ -105,6 +107,10 @@ cd ..
 cp tmp/kubeconfig.yaml /etc/kubernetes/
 
 cp tmp/systemd/ovn-k8s-gateway-helper.service /etc/systemd/system/
+cp tmp/systemd/gateway-network-startup.service /etc/systemd/system/
+
+cp check-ovn-k8s-network.sh /usr/bin/
+chmod +x /usr/bin/check-ovn-k8s-network.sh
 
 curl -Lskj -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v$K8S_VERSION/bin/linux/amd64/kubectl
 chmod +x /usr/bin/kubectl
@@ -145,6 +151,7 @@ ovn-k8s-overlay gateway-init \
 
 systemctl daemon-reload
 systemctl enable ovn-k8s-gateway-helper.service
+systemctl enable gateway-network-startup.service
 systemctl start ovn-k8s-gateway-helper.service
 ```
 

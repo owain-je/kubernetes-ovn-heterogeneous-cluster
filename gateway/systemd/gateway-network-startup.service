@@ -1,0 +1,8 @@
+[Unit]
+After=openvswitch-switch.service
+
+[Service]
+ExecStart=/usr/bin/check-ovn-k8s-network.sh __NIC__
+
+[Install]
+WantedBy=multi-user.target
