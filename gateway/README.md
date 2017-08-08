@@ -72,7 +72,7 @@ export LOCAL_IP=10.142.0.4
 export GW_IP=10.142.0.1
 export HOSTNAME=`hostname`
 export NIC=ens4
-export K8S_VERSION=1.5.3
+export K8S_VERSION=1.7.3
 export K8S_POD_SUBNET=10.244.0.0/16
 
 ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \

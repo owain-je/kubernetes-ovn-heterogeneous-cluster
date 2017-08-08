@@ -114,7 +114,7 @@ mkdir tmp
 cp -R ../make-certs ../openssl.cnf ../kubeconfig.yaml systemd tmp/
 
 export HOSTNAME=`hostname`
-export K8S_VERSION=1.5.3
+export K8S_VERSION=1.7.3
 export K8S_POD_SUBNET=10.244.0.0/16
 export K8S_NODE_POD_SUBNET=10.244.2.0/24
 export K8S_DNS_SERVICE_IP=10.100.0.10
