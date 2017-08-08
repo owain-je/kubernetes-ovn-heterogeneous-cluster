@@ -43,13 +43,13 @@ cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
 
-dpkg -i openvswitch-common_2.6.2-1_amd64.deb \
-openvswitch-datapath-dkms_2.6.2-1_all.deb \
-openvswitch-switch_2.6.2-1_amd64.deb \
-ovn-common_2.6.2-1_amd64.deb \
-ovn-central_2.6.2-1_amd64.deb \
-ovn-host_2.6.2-1_amd64.deb \
-python-openvswitch_2.6.2-1_all.deb
+dpkg -i openvswitch-common_2.7.2-1_amd64.deb \
+openvswitch-datapath-dkms_2.7.2-1_all.deb \
+openvswitch-switch_2.7.2-1_amd64.deb \
+ovn-common_2.7.2-1_amd64.deb \
+ovn-central_2.7.2-1_amd64.deb \
+ovn-host_2.7.2-1_amd64.deb \
+python-openvswitch_2.7.2-1_all.deb
 ```
 
 We'll need to make sure `vport_geneve` kernel module is loaded at boot:

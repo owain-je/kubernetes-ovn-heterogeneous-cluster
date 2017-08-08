@@ -36,14 +36,14 @@ cd ~
 git clone https://github.com/apprenda/kubernetes-ovn-heterogeneous-cluster
 cd kubernetes-ovn-heterogeneous-cluster/deb
 
-dpkg -i openvswitch-common_2.6.2-1_amd64.deb \
-openvswitch-datapath-dkms_2.6.2-1_all.deb \
-openvswitch-switch_2.6.2-1_amd64.deb \
-ovn-common_2.6.2-1_amd64.deb \
-ovn-central_2.6.2-1_amd64.deb \
-ovn-docker_2.6.2-1_amd64.deb \
-ovn-host_2.6.2-1_amd64.deb \
-python-openvswitch_2.6.2-1_all.deb
+dpkg -i openvswitch-common_2.7.2-1_amd64.deb \
+openvswitch-datapath-dkms_2.7.2-1_all.deb \
+openvswitch-switch_2.7.2-1_amd64.deb \
+ovn-common_2.7.2-1_amd64.deb \
+ovn-central_2.7.2-1_amd64.deb \
+ovn-docker_2.7.2-1_amd64.deb \
+ovn-host_2.7.2-1_amd64.deb \
+python-openvswitch_2.7.2-1_all.deb
 ```
 
 We'll need to make sure `vport_geneve` kernel module is loaded at boot:
@@ -63,11 +63,15 @@ SSH again into the machine, become root and proceed to configure OVS/OVN.
 * Pay attention to the environment variables below, particularly:
   * `LOCAL_IP` must be the public IP of this node
 
+
 Create the OVS bridge interface:
 ```sh
 export TUNNEL_MODE=geneve
 export LOCAL_IP=10.142.0.2
 export MASTER_IP=$LOCAL_IP
+
+ovn-nbctl set-connection ptcp:6641
+ovn-sbctl set-connection ptcp:6642
 
 ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$MASTER_IP:6642" \
   external_ids:ovn-nb="tcp:$MASTER_IP:6641" \
