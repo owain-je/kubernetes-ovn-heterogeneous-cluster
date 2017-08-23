@@ -33,6 +33,9 @@ enable-vmswitchextension "cloudbase open vswitch extension"; sleep 2; restart-se
 ovs-vsctl set Open_vSwitch . external_ids:k8s-api-server="$($KUBERNETES_API_SERVER):8080"
 ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:$($KUBERNETES_API_SERVER):6642" external_ids:ovn-nb="tcp:$($KUBERNETES_API_SERVER):6641" external_ids:ovn-encap-ip=$PUBLIC_IP external_ids:ovn-encap-type="geneve"
 
+#AWS specific for internal networking Could add a test for non public ip ranges 
+ovs-ofctl.exe add-flow br-ex priority=1,action=strip_vlan,NORMAL
+
 $GUID = (New-Guid).Guid
 ovs-vsctl set Open_vSwitch . external_ids:system-id="$($GUID)"
 
