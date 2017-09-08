@@ -1,6 +1,6 @@
 # Heterogeneous Kubernetes cluster on top of OVN
 
-**Author**: Paulo Pires <pires@apprenda.com>
+**Authors**: Paulo Pires, Bob Steciuk <bsteciuk@apprenda.com>
 
 This document describes, step-by-step, how to provision a Kubernetes cluster comprised of:
 * One Linux machine acting as Kubernetes master node and OVN central database.
