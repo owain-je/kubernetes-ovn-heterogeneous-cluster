@@ -25,6 +25,7 @@ spec:
       - --client-ca-file=/etc/kubernetes/tls/ca.pem
       - --service-account-key-file=/etc/kubernetes/tls/apiserver-key.pem
       - --runtime-config=extensions/v1beta1=true,extensions/v1beta1/networkpolicies=true,batch/v2alpha1=true
+      - --cloud-provider=aws
     ports:
     - containerPort: 443
       hostPort: 443
