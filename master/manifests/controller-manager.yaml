@@ -18,6 +18,7 @@ spec:
       - --cluster-signing-cert-file=/etc/kubernetes/tls/ca.pem
       - --cluster-signing-key-file=/etc/kubernetes/tls/ca-key.pem
       - --insecure-experimental-approve-all-kubelet-csrs-for-group=system:kubelet-bootstrap
+      - --cloud-provider=aws
     livenessProbe:
       httpGet:
         host: 127.0.0.1
